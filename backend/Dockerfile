@@ -16,9 +16,10 @@ WORKDIR /app
 # Only the executable Spring Boot jar is built by bootJar (the "-plain" jar is not), so this matches exactly one file.
 COPY --from=build /workspace/build/libs/routeview-backend-*-SNAPSHOT.jar /app/app.jar
 USER routeview
-# Production profile: no defaults for the database, so a missing setting stops the start instead of guessing.
-ENV SPRING_PROFILES_ACTIVE=prod \
-    JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 # The port comes from Render's PORT variable (see application.yml); 8080 is the local default.
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# This image is production only: -Dspring.profiles.active=prod beats a SPRING_PROFILES_ACTIVE=dev copied from a local
+# .env into the host's dashboard. The prod profile has no database defaults, so a missing POSTGRES_* setting stops the
+# start with a clear message instead of silently trying localhost.
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "/app/app.jar"]

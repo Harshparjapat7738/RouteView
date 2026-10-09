@@ -35,7 +35,7 @@ Render has no native Java runtime, so the service uses the Docker runtime and `b
 | Port | nothing to set: the app uses Render's `PORT` (`SERVER_PORT` overrides it) |
 | Instance memory | the bus graph (about 99 k pattern stops) is cached in memory; a 512 MB instance may be tight, prefer 1 GB. Not measured on Render. |
 
-The image runs with `SPRING_PROFILES_ACTIVE=prod` (override in the dashboard if needed), a non-root user, `-XX:MaxRAMPercentage=75`, and graceful shutdown so a redeploy finishes in-flight requests. The tests are skipped in the image build because they need a PostGIS database; run `./gradlew test` in CI or locally.
+The image always starts the `prod` profile (`-Dspring.profiles.active=prod`, which a dashboard `SPRING_PROFILES_ACTIVE` cannot override), a non-root user, `-XX:MaxRAMPercentage=75`, and graceful shutdown so a redeploy finishes in-flight requests. The tests are skipped in the image build because they need a PostGIS database; run `./gradlew test` in CI or locally.
 
 ### TLS to the database
 
@@ -81,7 +81,7 @@ Never put a secret in a `VITE_` variable: it is public in the JavaScript bundle.
 | `VITE_GOOGLE_MAPS_MAP_ID` | Vercel (build) | Recommended | Your own Map ID (not the development `DEMO_MAP_ID`) | No | `DEMO_MAP_ID` |
 | `VITE_MAP_DEFAULT_LAT`, `_LNG`, `_ZOOM` | Vercel (build) | No | Initial map view | No | India, zoom 5 |
 | `DEV_BACKEND_URL` | local only | No | Vite dev proxy target. Not used in production | No | `http://localhost:8080` |
-| `SPRING_PROFILES_ACTIVE` | Render | Set by the image (`prod`) | Production profile | No | `prod` in the image |
+| `SPRING_PROFILES_ACTIVE` | Render | Do not set | The image forces `prod`; never copy `dev` from a local `.env` | No | `prod` in the image |
 | `POSTGRES_HOST` | Render | Yes (unless `SPRING_DATASOURCE_URL`) | Database host | No | none in `prod` |
 | `POSTGRES_PORT` | Render | No | Database port | No | `5432` |
 | `POSTGRES_DB` | Render | Yes (unless URL) | Database name | No | none in `prod` |
@@ -119,8 +119,13 @@ Do not treat the deployment as working until each of these has been checked on t
 * With data imported, a Metro journey (Delhi) returns stations and lines, and a Bus journey returns a timetable.
 * Render logs show Flyway applied V1–V9 and no import ran at startup.
 
+## Troubleshooting a failed first start
+
+* **`The following 1 profile is active: "dev"` and `Connection to localhost:5433 refused`**: the dashboard variables were copied from a local `backend/.env` (`dev` profile, local port 5433, no `POSTGRES_HOST`). On Render set only the production values from the table above: `POSTGRES_HOST` = the database's **internal** hostname, `POSTGRES_PORT` = `5432`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`. Delete `SPRING_PROFILES_ACTIVE`, `SERVER_PORT` and any local-only values.
+* **`No open ports detected, continuing to scan...`** during startup is normal while Spring Boot is still starting (about 30–60 s); it only matters if the service exits.
+
 ## Known gaps (need a decision or manual action)
 
 * `/api/routes` is public and has no rate limit. Each call can use paid Google Routes quota. Cap it with Google Cloud quotas and billing alerts, or decide on rate limiting at an edge/proxy.
 * The metro, bus and area datasets must be imported by hand and are large.
-* The Docker image has not been built in the sandbox used for this preparation (no Docker daemon, and the Gradle plugin repository was not reachable); the first Render build is its first test.
+* The Docker image builds on Render (the first Render build compiled the backend and produced an image); the application still needs correct database variables to start.
