@@ -76,7 +76,7 @@ Never put a secret in a `VITE_` variable: it is public in the JavaScript bundle.
 
 | Variable | Where | Required | Purpose | Secret | Safe default |
 |---|---|---|---|---|---|
-| `VITE_API_BASE_URL` | Vercel (build) | Yes in production | Full backend base including `/api`, e.g. `https://<render-service>.onrender.com/api`. The default `/api` only works with a same-origin proxy and would fail on Vercel | No | `/api` (development) |
+| `VITE_API_BASE_URL` | Vercel (build) | Yes in production | Full backend base including `/api`, e.g. `https://routeview-3.onrender.com/api`. Vite embeds this value at build time; set it in the frontend hosting environment and rebuild. The source default `/api` is for the development proxy or same-origin deployments | No | `/api` (development) |
 | `VITE_GOOGLE_MAPS_API_KEY` | Vercel (build) | Yes | Browser key for Maps JavaScript + Places (New). Restrict by HTTP referrer (your Vercel domain) and by API | Public by nature, restricted | none (map shows "not configured") |
 | `VITE_GOOGLE_MAPS_MAP_ID` | Vercel (build) | Recommended | Your own Map ID (not the development `DEMO_MAP_ID`) | No | `DEMO_MAP_ID` |
 | `VITE_MAP_DEFAULT_LAT`, `_LNG`, `_ZOOM` | Vercel (build) | No | Initial map view | No | India, zoom 5 |
