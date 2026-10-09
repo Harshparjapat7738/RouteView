@@ -16,7 +16,11 @@ public record CorsProperties(List<String> allowedOrigins) {
     public CorsProperties {
         allowedOrigins = allowedOrigins == null
                 ? List.of()
-                : allowedOrigins.stream().map(String::trim).filter(origin -> !origin.isEmpty()).toList();
+                : allowedOrigins.stream()
+                        .map(String::trim)
+                        .map(origin -> origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin)
+                        .filter(origin -> !origin.isEmpty())
+                        .toList();
         if (allowedOrigins.stream().anyMatch(origin -> origin.contains("*"))) {
             throw new IllegalArgumentException(
                     "routeview.cors.allowed-origins must list explicit origins; wildcards are not allowed");

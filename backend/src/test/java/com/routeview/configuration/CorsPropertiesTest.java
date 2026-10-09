@@ -18,6 +18,12 @@ class CorsPropertiesTest {
     }
 
     @Test
+    void normalizesOneTrailingSlashFromConfiguredOrigin() {
+        CorsProperties properties = new CorsProperties(List.of(" https://app.example.com/ "));
+        assertEquals(List.of("https://app.example.com"), properties.allowedOrigins());
+    }
+
+    @Test
     void missingListMeansNoCrossOriginAccess() {
         assertTrue(new CorsProperties(null).allowedOrigins().isEmpty());
     }
