@@ -1,0 +1,30 @@
+.map-area-highlight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.map-area-highlight__label {
+  max-width: 160px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-area-highlight__dot {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.4);
+}

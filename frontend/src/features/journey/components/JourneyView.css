@@ -1,0 +1,384 @@
+/* Journey View: the route-detail screen. A floating card on wide screens, the content of the bottom sheet on phones. */
+.journey-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.journey-view__top,
+.journey-view__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.journey-view__top {
+  padding-top: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.journey-view__timeline {
+  padding-top: 16px;
+  padding-bottom: 20px;
+}
+
+.journey-view__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  min-height: 40px;
+  margin-left: -8px;
+  padding: 0 12px 0 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-brand-strong);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.journey-view__back:hover {
+  background: var(--color-brand-soft);
+}
+
+.journey-view__message {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.journey-view__message--error {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.journey-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.journey-header__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.journey-header__figures,
+.journey-header__badges {
+  margin: 0;
+}
+
+.journey-header__figures {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+.journey-header__duration {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.journey-header__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.journey-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.journey-badge--selected {
+  background: var(--color-brand);
+  color: #ffffff;
+}
+
+.journey-badge--match {
+  background: var(--color-brand-soft);
+  color: var(--color-brand-strong);
+  box-shadow: inset 0 0 0 1px var(--color-brand);
+}
+
+.journey-badge--muted {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+/* Route switcher: a row of segmented chips. */
+.route-switcher__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.route-switcher__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+
+.route-switcher__button:hover {
+  background: var(--color-surface-muted);
+}
+
+.route-switcher__button[aria-pressed='true'] {
+  border-color: var(--color-brand);
+  background: var(--color-brand-soft);
+  box-shadow: 0 0 0 1px var(--color-brand);
+  font-weight: 700;
+}
+
+.route-switcher__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.route-switcher__swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.route-switcher__time {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* Timeline: ● Start │ ● stops │ ● Destination */
+.journey-timeline__list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journey-timeline__list::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  bottom: 22px;
+  left: 13px;
+  width: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-brand) 35%, var(--color-border));
+}
+
+.journey-timeline__end {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  column-gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.journey-timeline__end-label {
+  grid-column: 2;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.journey-timeline__end-name {
+  grid-column: 2;
+  font-size: 1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Start: a ring; destination: a pin-coloured square dot; stops: small dots. Shape differs as well as colour. */
+.journey-timeline__end .journey-timeline__marker {
+  grid-row: 1 / span 2;
+  grid-column: 1;
+  justify-self: center;
+  width: 20px;
+  height: 20px;
+  border: 5px solid var(--color-brand);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.journey-timeline__end--destination .journey-timeline__marker {
+  border: 0;
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-destination);
+  transform: rotate(-45deg) scale(0.9);
+}
+
+.journey-timeline__stop {
+  position: relative;
+}
+
+.journey-timeline__button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  column-gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 6px 8px 6px 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.journey-timeline__button:hover {
+  background: var(--color-surface-muted);
+}
+
+.journey-timeline__stop .journey-timeline__marker {
+  grid-row: 1 / span 2;
+  justify-self: center;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--color-brand);
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: transform var(--dur) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.journey-timeline__stop[data-match='true'] .journey-timeline__marker {
+  background: var(--color-brand);
+}
+
+.journey-timeline__stop[data-selected='true'] .journey-timeline__button {
+  background: var(--color-brand-soft);
+  box-shadow: inset 3px 0 0 var(--color-brand);
+}
+
+.journey-timeline__stop[data-selected='true'] .journey-timeline__marker {
+  background: var(--color-brand);
+  transform: scale(1.35);
+}
+
+.journey-timeline__stop[data-selected='true'] .journey-timeline__name {
+  font-weight: 700;
+}
+
+.journey-timeline__name {
+  grid-column: 2;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.journey-timeline__stop[data-match='true'] .journey-timeline__name {
+  color: var(--color-brand-strong);
+  font-weight: 600;
+}
+
+.journey-timeline__tag {
+  grid-column: 3;
+  grid-row: 1;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.journey-timeline__tag--match {
+  background: var(--color-brand-soft);
+  color: var(--color-brand-strong);
+}
+
+.journey-timeline__meta {
+  grid-column: 2 / span 2;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.journey-timeline__empty {
+  padding: 8px 0 8px 40px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Narrow screens: the route switcher shares one compact row so the summary stays short. */
+@media (max-width: 767.98px) {
+  .route-switcher__list > li {
+    flex: 1 1 72px;
+    min-width: 0;
+  }
+
+  .route-switcher__button {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    padding: 4px 6px;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .route-switcher__time {
+    font-size: 0.75rem;
+  }
+}
+
+.journey-view__subheading {
+  margin: 8px 12px 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.journey-view__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.journey-view__bar .share {
+  flex: 0 1 auto;
+}
+
+/* An open share panel takes the full row so its buttons are never squeezed. */
+.journey-view__bar .share:has(.share__panel),
+.journey-view__bar .share:has(.share__status:not(:empty)) {
+  flex-basis: 100%;
+}

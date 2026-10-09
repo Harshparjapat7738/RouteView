@@ -1,0 +1,28 @@
+.map-destination {
+  position: absolute;
+  z-index: 2;
+  right: var(--edge, 12px);
+  /* Directly above the Current Location button (which sits above Google's zoom buttons). */
+  bottom: 188px;
+  pointer-events: none;
+}
+
+.map-destination > * {
+  pointer-events: auto;
+}
+
+.map-destination__button {
+  color: var(--color-destination);
+}
+
+.map-destination__button[data-tone='active'] {
+  color: var(--color-destination);
+  box-shadow: 0 0 0 2px var(--color-destination), var(--shadow-1);
+}
+
+@media (max-width: 767.98px) {
+  .map-destination {
+    right: 10px;
+    bottom: 88px;
+  }
+}

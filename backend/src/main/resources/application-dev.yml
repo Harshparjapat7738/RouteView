@@ -1,0 +1,5 @@
+# Local development. Activated by default (spring.profiles.default=dev).
+
+logging:
+  level:
+    com.routeview: DEBUG

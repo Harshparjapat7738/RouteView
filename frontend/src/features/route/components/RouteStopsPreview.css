@@ -1,0 +1,48 @@
+.route-stops-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.route-stops-preview__line,
+.route-stops-preview__empty {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.route-stops-preview__line strong {
+  color: var(--color-text);
+}
+
+.route-stops-preview__list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.route-stops-preview__list [data-match='true'] {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.route-stops-preview__toggle {
+  min-height: 32px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-brand-strong);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.route-stops-preview__toggle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

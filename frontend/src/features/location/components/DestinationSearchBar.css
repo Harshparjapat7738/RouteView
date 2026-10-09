@@ -1,0 +1,84 @@
+/* The compact floating address search bar (Google-Maps-like): logo, magnifier or pin, input, clear. */
+.search-bar {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 8px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-2);
+  transition: box-shadow var(--dur) var(--ease);
+}
+
+.search-bar:focus-within {
+  box-shadow: var(--shadow-3);
+  /* The field itself has no outline: the whole bar shows the focus ring. */
+  outline: 2px solid var(--color-focus);
+  outline-offset: 0;
+}
+
+.search-bar__logo {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--color-brand);
+  color: #ffffff;
+}
+
+.search-bar .location-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Inside the bar the field has no box of its own: the bar is the box. */
+.search-bar .location-input__field {
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  outline: none;
+}
+
+.search-bar .location-input__field:hover:not(:disabled),
+.search-bar .location-input__field:focus {
+  background: transparent;
+  outline: none;
+}
+
+/* Confirmed destination: red pin, bold name. */
+.search-bar .location-input__field--selected {
+  font-weight: 600;
+}
+
+.search-bar .location-input__icon {
+  left: 10px;
+}
+
+.search-bar .location-input__popup {
+  top: calc(100% + 10px);
+  left: -44px;
+  right: -6px;
+  border-radius: var(--radius-lg);
+}
+
+.search-bar__issue {
+  flex: 1;
+  margin: 0;
+  padding: 8px 8px 8px 4px;
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 767.98px) {
+  .search-bar {
+    position: absolute;
+    top: calc(max(8px, env(safe-area-inset-top)) + var(--offline-h, 0px));
+    right: 8px;
+    left: 8px;
+  }
+}

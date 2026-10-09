@@ -1,0 +1,41 @@
+.map-control-button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.map-control-button:hover {
+  color: var(--color-text);
+  box-shadow: var(--shadow-2);
+}
+
+.map-control-button:active {
+  transform: scale(0.94);
+  background: var(--color-brand-soft);
+}
+
+.map-control-button[data-tone='active'] {
+  color: var(--color-current);
+}
+
+.map-control-button[data-tone='error'] {
+  color: var(--color-danger);
+  box-shadow: 0 0 0 2px var(--color-danger), var(--shadow-1);
+}
+
+.map-control-button[aria-disabled='true'] {
+  opacity: 0.65;
+  cursor: default;
+  transform: none;
+}

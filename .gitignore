@@ -1,0 +1,40 @@
+# ---- Environment / secrets ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+.vite/
+coverage/
+npm-debug.log*
+
+# ---- Java / backend ----
+build/
+target/
+.gradle/
+out/
+hs_err_pid*
+
+# ---- IDE / OS ----
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Metro dataset (downloaded by you, never committed) ----
+backend/metro.data/*
+!backend/metro.data/README.md

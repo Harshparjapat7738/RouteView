@@ -1,0 +1,413 @@
+/* Line pill: colour swatch + text name. */
+.metro-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 1px 8px 1px 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.metro-line__swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--metro-line-color);
+  box-shadow: inset 0 0 0 2px var(--color-surface);
+}
+
+.metro-line__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Route card summary. */
+.metro-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.metro-summary__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+
+.metro-summary__fare {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.metro-summary__fare[data-metro-fare='unavailable'] {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.metro-summary__path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.metro-summary__station {
+  font-weight: 600;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+/* Timeline. */
+.metro-timeline {
+  padding: 8px 12px 8px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.metro-timeline__fare {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.metro-timeline__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metro-step {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+
+.metro-step::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 16px;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.metro-step:last-child::before {
+  display: none;
+}
+
+.metro-step[data-kind='walk']::before {
+  background: none;
+  border-left: 2px dotted var(--color-text-muted);
+  width: 0;
+}
+
+.metro-step__marker {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 2px var(--color-text-muted);
+}
+
+.metro-step[data-kind='metro'] .metro-step__marker {
+  background: var(--color-brand);
+  box-shadow: none;
+}
+
+.metro-step[data-kind='interchange'] .metro-step__marker {
+  border-radius: 3px;
+  transform: rotate(45deg) scale(0.85);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 3px var(--color-brand);
+}
+
+.metro-step[data-kind='destination'] .metro-step__marker {
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--color-destination);
+  box-shadow: none;
+}
+
+.metro-step__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.metro-step__title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.metro-step__detail {
+  margin: 2px 0 0;
+  color: var(--color-text-muted);
+}
+
+.metro-step__change {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.metro-step__other,
+.metro-step__tag {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.metro-step__stations {
+  margin: 4px 0;
+}
+
+.metro-step__stations summary {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-brand-strong);
+  font-weight: 600;
+}
+
+.metro-step__stations summary:focus-visible,
+.metro-station-button:focus-visible,
+.metro-detail__close:focus-visible,
+.metro-marker:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.metro-step__station-list {
+  margin: 0;
+  padding: 0 0 0 4px;
+  list-style: none;
+  border-left: 2px solid var(--color-border);
+}
+
+.metro-step__station-list li {
+  padding-left: 8px;
+}
+
+.metro-station-button {
+  display: inline;
+  min-height: 32px;
+  padding: 4px 2px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-brand-strong);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  cursor: pointer;
+}
+
+.metro-station-button:hover,
+.metro-station-button[aria-pressed='true'] {
+  text-decoration-color: currentcolor;
+}
+
+.metro-timeline__notices {
+  margin: 4px 0 0;
+  padding: 8px 12px 8px 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.metro-timeline__dataset {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Station marker. */
+.metro-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  /* 44px touch target around a small dot. */
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.metro-marker::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+
+.metro-marker__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: 0 0 0 2px #374151;
+}
+
+.metro-marker[data-interchange='true'] .metro-marker__dot {
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 0 0 3px #111827;
+}
+
+.metro-marker[data-role='journey'] .metro-marker__dot {
+  width: 14px;
+  height: 14px;
+  background: var(--color-brand);
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-brand-strong);
+}
+
+.metro-marker[data-role='boarding'] .metro-marker__dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-brand-strong);
+}
+
+.metro-marker[data-role='interchange'] .metro-marker__dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  transform: rotate(45deg);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-brand-strong);
+}
+
+.metro-marker[data-role='exit'] .metro-marker__dot {
+  width: 20px;
+  height: 20px;
+  background: var(--color-destination);
+  box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-destination);
+}
+
+.metro-marker[data-selected='true'] .metro-marker__dot {
+  box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 6px var(--color-current);
+}
+
+.metro-marker[data-muted='true'] {
+  opacity: 0.55;
+}
+
+.metro-marker__label {
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-1);
+}
+
+/* Station detail card, in the map's top-right corner. */
+.map-metro-detail {
+  position: absolute;
+  z-index: 3;
+  top: var(--edge, 12px);
+  right: var(--edge, 12px);
+  width: min(300px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+}
+
+.metro-detail {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  box-shadow: var(--shadow-3);
+}
+
+.metro-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metro-detail__name {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.metro-detail__close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -8px -8px 0 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.metro-detail__role {
+  margin: 2px 0 0;
+  color: var(--color-text-muted);
+}
+
+.metro-detail__lines,
+.metro-detail__sequence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metro-detail__sequence {
+  flex-direction: column;
+}
+
+.metro-detail__neighbours {
+  display: block;
+  color: var(--color-text-muted);
+}
+
+/* Phones: the search bar floats over the top of the map, so the card sits at the bottom, left of the map buttons. */
+@media (max-width: 767.98px) {
+  .map-metro-detail {
+    top: auto;
+    right: auto;
+    bottom: 36px;
+    left: 10px;
+    width: calc(100% - 80px);
+    max-height: calc(100% - 120px);
+  }
+}
+
+.metro-step__detail--muted {
+  color: var(--text-muted, #6b7280);
+  font-style: italic;
+}

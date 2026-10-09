@@ -1,0 +1,136 @@
+# Shared configuration for all environments.
+# Secrets are NEVER written here: they come from environment variables
+# (or from a local, git-ignored backend/.env file during development).
+
+spring:
+  application:
+    name: routeview
+  profiles:
+    default: dev
+  config:
+    import: optional:file:.env[.properties]
+
+  # PostgreSQL + PostGIS. The password has no default on purpose: the application refuses to
+  # start without POSTGRES_PASSWORD instead of falling back to a guessable value.
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:routeview}
+    username: ${POSTGRES_USER:routeview}
+    password: ${POSTGRES_PASSWORD}
+    hikari:
+      connection-timeout: 5000
+      maximum-pool-size: 10
+  jpa:
+    # The schema belongs to Flyway migrations only; Hibernate never creates or alters tables.
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Flyway may never wipe the database, whatever the profile.
+    clean-disabled: true
+
+server:
+  # SERVER_PORT wins; otherwise the PORT variable that hosts such as Render set; otherwise 8080 for local development.
+  port: ${SERVER_PORT:${PORT:8080}}
+  # Finish in-flight requests when the platform stops the instance (a redeploy) instead of cutting them off.
+  shutdown: graceful
+  # Reject oversized headers; request bodies are capped by RequestSizeLimitFilter.
+  max-http-request-header-size: 16KB
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
+    whitelabel:
+      enabled: false
+
+routeview:
+  security:
+    # Largest accepted /api request body (bytes). Route requests are a few hundred bytes.
+    max-request-body-bytes: ${MAX_REQUEST_BODY_BYTES:16384}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+  google:
+    routes:
+      api-key: ${GOOGLE_MAPS_SERVER_API_KEY:}
+      base-url: https://routes.googleapis.com
+      connect-timeout: 3s
+      read-timeout: 10s
+
+  area-import:
+    # Used only by the explicit import command (gradlew importAreas), never at normal startup.
+    run: false
+    region: ${AREA_IMPORT_REGION:}
+    source-file: ${AREA_IMPORT_SOURCE_FILE:}
+    overpass-url: ${AREA_IMPORT_OVERPASS_URL:https://overpass-api.de/api/interpreter}
+    batch-size: ${AREA_IMPORT_BATCH_SIZE:200}
+    max-span-degrees: ${AREA_IMPORT_MAX_SPAN_DEGREES:1.0}
+    # Polygons outside these sizes are rejected as slivers / non-journey areas (not as 'too small to be a village').
+    min-area-square-meters: ${AREA_IMPORT_MIN_AREA_SQUARE_METERS:500}
+    max-area-square-kilometers: ${AREA_IMPORT_MAX_AREA_SQUARE_KILOMETERS:150000}
+
+  bus-journey:
+    # Delhi bus journeys are planned over the GTFS schedule (static timetable, not live positions).
+    time-zone: ${BUS_JOURNEY_TIME_ZONE:Asia/Kolkata}
+    max-alternatives: ${BUS_JOURNEY_MAX_ALTERNATIVES:3}
+
+  metro-import:
+    # Used only by the explicit import command (gradlew importMetro), never at normal startup. See docs/metro.md.
+    run: false
+    # Default: the metro.data folder next to the backend (put the dataset .zip, or its unzipped folder, there).
+    source-file: ${METRO_IMPORT_SOURCE_FILE:metro.data}
+    source: ${METRO_IMPORT_SOURCE:DMRC_GTFS}
+    # Required for an import: the dataset's version label / publication date, stored with every record.
+    source-version: ${METRO_IMPORT_SOURCE_VERSION:}
+    source-updated-at: ${METRO_IMPORT_SOURCE_UPDATED_AT:}
+    cluster-meters: ${METRO_IMPORT_CLUSTER_METERS:300}
+    max-station-gap-meters: ${METRO_IMPORT_MAX_STATION_GAP_METERS:40000}
+
+  bus-import:
+    # Used only by the explicit import command (gradlew importBus), never at normal startup. See docs/bus.md.
+    run: false
+    # Default: the bus dataset folder inside metro.data (put the GTFS .zip, or its unzipped folder, in metro.data/bus).
+    source-file: ${BUS_IMPORT_SOURCE_FILE:metro.data/bus}
+    source: ${BUS_IMPORT_SOURCE:DELHI_BUS_GTFS}
+    # Required for an import: the dataset's version label / publication date, stored with every record.
+    source-version: ${BUS_IMPORT_SOURCE_VERSION:}
+    source-updated-at: ${BUS_IMPORT_SOURCE_UPDATED_AT:}
+    batch-size: ${BUS_IMPORT_BATCH_SIZE:5000}
+
+  # Area Detection Engine (see docs/area-detection.md). Every value has a default; only tune with data in hand.
+  area-detection:
+    tolerance-meters: ${AREA_DETECTION_TOLERANCE_METERS:30}
+    min-crossing-meters: ${AREA_DETECTION_MIN_CROSSING_METERS:250}
+    min-crossing-floor-meters: ${AREA_DETECTION_MIN_CROSSING_FLOOR_METERS:60}
+    min-crossing-fraction-of-size: 0.25
+    # Broad administrative types, shown only where no finer area covers the same stretch of the route.
+    container-types: MUNICIPALITY,DISTRICT
+    hierarchy-filtering-enabled: true
+    # Route running within this distance of an area's border does not count as inside it (shared-border roads).
+    boundary-band-meters: ${AREA_DETECTION_BOUNDARY_BAND_METERS:12}
+    # Most route length (metres) an area of the type must contain to be a journey stop; small areas need less
+    # (see min-crossing-fraction-of-size). Types not listed use min-crossing-meters.
+    minimum-intersection-by-area-type:
+      CITY: 500
+      TOWN: 350
+      VILLAGE: 200
+      LOCALITY: 150
+      SUBURB: 200
+      SECTOR: 120
+      MUNICIPALITY: 1500
+      DISTRICT: 3000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    root: INFO
+    com.routeview: INFO

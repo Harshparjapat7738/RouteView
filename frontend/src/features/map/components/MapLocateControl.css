@@ -1,0 +1,119 @@
+.map-locate {
+  position: absolute;
+  z-index: 2;
+  right: var(--edge, 12px);
+  /* Wide screens: above Google's zoom buttons, which occupy the bottom-right corner. */
+  bottom: 136px;
+  display: flex;
+  /* The message opens to the left of the button, so it cannot grow past the top of a short map. */
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.map-locate > * {
+  pointer-events: auto;
+}
+
+.map-locate__spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-current);
+  border-radius: 50%;
+  animation: map-locate-spin 0.9s linear infinite;
+}
+
+@keyframes map-locate-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.map-locate__message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: min(280px, calc(100vw - 96px));
+  padding: 10px 6px 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  box-shadow: var(--shadow-2);
+  animation: map-locate-message-in var(--dur) var(--ease);
+}
+
+@keyframes map-locate-message-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+
+.map-locate__message-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: var(--color-surface);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.map-locate__message-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.map-locate__message-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -6px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.map-locate__message-close:hover {
+  background: var(--color-surface-muted);
+}
+
+.map-locate__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Phones: no zoom buttons (pinch zooms); the button rides just above the results sheet. */
+@media (max-width: 767.98px) {
+  /* The map element ends where the sheet begins; keep clear of Google's attribution line along its bottom edge. */
+  .map-locate {
+    right: 10px;
+    bottom: 36px;
+  }
+
+  .map-locate__message {
+    max-width: min(280px, calc(100vw - 80px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-locate__spinner {
+    animation-duration: 3s;
+  }
+}

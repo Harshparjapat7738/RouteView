@@ -1,0 +1,121 @@
+.location-panel {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+.location-panel__title {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-brand-strong);
+}
+
+.location-panel__here {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 14px 0 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  color: var(--color-current);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.location-panel__here svg {
+  width: 20px;
+  height: 20px;
+}
+
+.location-panel__here:hover {
+  background: color-mix(in srgb, var(--color-current) 14%, var(--color-surface-muted));
+}
+
+.location-panel__here[aria-disabled='true'] {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.location-panel__issue {
+  margin: 0 0 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.location-panel__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.location-panel__submit:hover {
+  background: var(--color-brand-strong);
+  box-shadow: var(--shadow-1);
+}
+
+.location-panel__submit[aria-disabled='true'] {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.location-panel__submit[aria-busy='true'] {
+  background: var(--color-brand);
+  color: #ffffff;
+  cursor: progress;
+}
+
+.location-panel__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgb(255 255 255 / 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: location-panel-spin 0.8s linear infinite;
+}
+
+@keyframes location-panel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.location-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* The 44px button must not make the compact heading taller: it overlaps the panel's padding instead. */
+.location-panel__heading .places-button {
+  margin: -14px -4px -14px 0;
+}

@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+.gradle/
+build/
+metro.data/
+db-tools/
+docker-compose.yml
+*.md

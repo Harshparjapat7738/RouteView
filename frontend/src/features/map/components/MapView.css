@@ -1,0 +1,12 @@
+.map-view {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 240px;
+  background: #e8eaed;
+}
+
+.map-view__canvas {
+  position: absolute;
+  inset: 0;
+}

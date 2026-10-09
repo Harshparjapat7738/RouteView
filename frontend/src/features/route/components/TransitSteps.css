@@ -1,0 +1,16 @@
+.transit-steps {
+  margin: 0;
+  padding: 8px 12px 4px 28px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.transit-steps__item + .transit-steps__item {
+  margin-top: 6px;
+}
+
+.transit-steps__item strong {
+  color: var(--color-text);
+}

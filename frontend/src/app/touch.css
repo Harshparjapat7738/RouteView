@@ -1,0 +1,77 @@
+/*
+ * Touch usability: on touch devices and narrow screens every control that is tapped gets at least a
+ * 44 x 44 px target (the platform guideline). Visual sizes stay compact where a larger hit area can be
+ * had with padding or a negative margin. Loaded after the component styles so it takes precedence.
+ */
+@media (pointer: coarse), (max-width: 767.98px) {
+  .location-input__clear,
+  .area-search__chip-remove,
+  .location-panel__swap,
+  .map-locate__message-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* The chip keeps its compact look; only the remove button's hit area grows beyond it. */
+  .area-search__chip-remove {
+    margin: -8px -6px -8px -4px;
+  }
+
+  .map-locate__message-close {
+    margin: -6px -2px;
+  }
+
+  .location-panel__swap {
+    width: 44px;
+    height: 44px;
+    margin-right: -4px;
+  }
+
+  .area-search__chip-list {
+    gap: 12px 8px;
+  }
+
+  .area-search__chip {
+    min-height: 32px;
+  }
+
+  .area-search__choose,
+  .area-search__add,
+  .area-search__clear,
+  .route-list__journey,
+  .journey-view__back,
+  .route-switcher__button,
+  .journey-stops__button,
+  .journey-stops__toggle,
+  .route-stops-preview__toggle,
+  .location-input__retry,
+  .route-list__retry {
+    min-height: 44px;
+  }
+
+  .area-search__clear {
+    min-width: 44px;
+  }
+
+  .route-stops-preview__toggle {
+    padding-inline: 4px;
+  }
+
+  .journey-view__back {
+    min-width: 44px;
+  }
+
+  /* Room for the larger clear button, and 16px text so iOS Safari does not zoom the page when a field is focused. */
+  .location-input__field {
+    padding-right: 52px;
+  }
+
+  .bottom-sheet__handle {
+    min-height: 44px;
+  }
+
+  .location-input__field,
+  .area-search__input {
+    font-size: 1rem;
+  }
+}

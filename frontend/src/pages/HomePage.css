@@ -1,0 +1,287 @@
+/*
+ * Map-first layout. The map fills the screen; everything else floats above it.
+ *   >= 768px  independent floating panels over the map (see below)
+ *   <  768px  a compact search panel at the top and a bottom sheet (peek / half / full) for the results
+ */
+.home-page {
+  --sheet-peek: 148px;
+  --sheet-h: var(--sheet-peek);
+  --map-footer: 0px;
+
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.home-page .map-view {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+}
+
+.home-page__sidebar {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  /* Empty space between and around the panels stays part of the map. */
+  pointer-events: none;
+}
+
+.home-page__sidebar > *,
+.home-page__sidebar .bottom-sheet__body > * {
+  pointer-events: auto;
+}
+
+.home-page__sidebar > .bottom-sheet,
+.home-page__sidebar .bottom-sheet__body {
+  pointer-events: none;
+}
+
+/*
+ * Wide screens: independent floating panels over a full-screen map. Each panel has a sensible maximum height
+ * and scrolls inside itself. The bottom edge is kept clear (--map-footer) so the Google logo and attribution
+ * are never covered.
+ *   >= 1100px  two columns: [search panel + passing-area search] [routes | journey view]
+ *   768-1099px one column, routes take the remaining height
+ */
+@media (min-width: 768px) {
+  .home-page {
+    --map-footer: 44px;
+  }
+
+  .home-page__sidebar {
+    display: grid;
+    grid-template-columns: min(380px, 100%);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    align-content: start;
+    align-items: start;
+    gap: var(--panel-gap);
+    padding: var(--edge) var(--edge) var(--map-footer);
+    width: min(100%, 404px);
+  }
+
+  .home-page .area-search,
+  .home-page .route-list,
+  .home-page .journey-view {
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    align-self: start;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-2);
+  }
+
+  /* Search bar first; the route configuration appears below it once a destination is chosen. */
+  .home-page .search-bar {
+    grid-row: 1;
+  }
+
+  .home-page .location-panel {
+    grid-row: 2;
+  }
+
+  .home-page .area-search {
+    grid-row: 2;
+    /* Suggestions can be long: the card stays below the search panel and scrolls inside. */
+    max-height: min(100%, 46dvh);
+  }
+
+  /* The expanded passing-area search scrolls inside its own region; the start-field suggestions stay unclipped. */
+  .home-page .passing-disclosure__body {
+    max-height: min(34dvh, 320px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .home-page .route-list {
+    grid-row: 3;
+    align-self: stretch;
+    max-height: 100%;
+  }
+
+  /* An almost empty routes card does not stretch to the bottom. */
+  .home-page .route-list:not(:has(.route-card, .route-list__skeletons)) {
+    align-self: start;
+  }
+
+  /* Journey View replaces the search panel: it takes the first rows, passing-area search sits below it. */
+  .home-page__sidebar:has(.journey-view) {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .home-page .journey-view {
+    grid-row: 1;
+    align-self: start;
+  }
+
+  .home-page__sidebar:has(.journey-view) .area-search {
+    grid-row: 2;
+    max-height: 38dvh;
+  }
+}
+
+/*
+ * Docked directions (wide screens): after a destination is chosen the search bar becomes one full-height panel
+ * on the left edge holding both fields, the passing-area control and the routes, like Google Maps' directions.
+ */
+@media (min-width: 768px) {
+  .home-page[data-dock='on'] .home-page__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* The bottom edge stays clear so the Google logo and attribution remain visible. */
+    bottom: var(--map-footer);
+    padding: 0;
+    width: min(100%, 408px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-2);
+    pointer-events: auto;
+  }
+
+  .home-page[data-dock='on'] .home-page__sidebar > *,
+  .home-page[data-dock='on'] .home-page__sidebar .bottom-sheet__body > * {
+    flex: none;
+    max-height: none;
+    overflow: visible;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    align-self: stretch;
+  }
+
+  .home-page[data-dock='on'] .home-page__sidebar .route-list,
+  .home-page[data-dock='on'] .home-page__sidebar .journey-view,
+  .home-page[data-dock='on'] .home-page__sidebar .area-search:not(.area-search--compact) {
+    border-top: 1px solid var(--color-border);
+    max-height: none;
+    overflow: visible;
+  }
+
+  .home-page[data-dock='on'] .passing-disclosure__body {
+    max-height: min(40dvh, 360px);
+  }
+}
+
+@media (min-width: 1100px) {
+  .home-page__sidebar {
+    grid-template-columns: min(380px, 100%) min(372px, 100%);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: var(--panel-gap);
+    justify-content: start;
+    width: min(100%, 786px);
+  }
+
+  .home-page .route-list {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+
+  .home-page .search-bar,
+  .home-page .location-panel {
+    grid-column: 1;
+  }
+
+  .home-page__sidebar:has(.journey-view) {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .home-page .journey-view {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    max-height: 100%;
+  }
+
+  .home-page__sidebar:has(.journey-view) .area-search {
+    grid-column: 2;
+    grid-row: 1;
+    max-height: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .home-page {
+    --sheet-h: var(--sheet-peek);
+  }
+
+  /* No destination yet: no sheet, the map uses the whole screen. */
+  .home-page[data-sheet='off'] {
+    --sheet-h: 0px;
+  }
+
+  .home-page[data-sheet='on'][data-snap='half'] {
+    /* On short screens the half height shrinks so the map keeps room next to the top search panel. */
+    --sheet-h: max(var(--sheet-peek), min(48dvh, 520px, calc(100dvh - 320px)));
+  }
+
+  .home-page[data-sheet='on'][data-snap='full'] {
+    --sheet-h: calc(100dvh - 128px);
+  }
+
+  .home-page__sidebar {
+    display: contents;
+  }
+
+  /*
+   * The map ends where the sheet begins, so the Google logo and attribution (bottom edge of the map element)
+   * are never covered, at any sheet height. When the sheet grows the map shrinks after the sheet's own
+   * transition (no gap, no per-frame map resizing); when it shrinks the map grows at once.
+   */
+  .home-page .map-view {
+    bottom: var(--sheet-h);
+    transition: bottom 0s linear 0s;
+  }
+
+  .home-page[data-sheet='on'][data-snap='half'] .map-view,
+  .home-page[data-sheet='on'][data-snap='full'] .map-view {
+    transition-delay: var(--dur);
+  }
+
+  .home-page__sidebar > .bottom-sheet,
+  .home-page__sidebar .bottom-sheet__body {
+    pointer-events: auto;
+  }
+
+  .home-page .bottom-sheet__body > * {
+    flex: none;
+  }
+
+  /* The sheet is one surface: blocks inside it are flat and separated by hairlines. */
+  .home-page .location-panel,
+  .home-page .area-search,
+  .home-page .route-list,
+  .home-page .journey-view {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .home-page .route-list {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .home-page[data-snap='full'] .search-bar {
+    visibility: hidden;
+  }
+
+  .home-page .passing-disclosure__body {
+    max-height: none;
+  }
+}
+
+/* Short phones (landscape, small browsers): drop the wordmark to keep the search panel compact. */
+@media (max-height: 640px) {
+  .home-page .search-bar__logo {
+    display: none;
+  }
+}

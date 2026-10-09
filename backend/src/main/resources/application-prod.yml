@@ -1,0 +1,25 @@
+# Production. Activate with SPRING_PROFILES_ACTIVE=prod.
+# CORS_ALLOWED_ORIGINS must be set explicitly (no default) when the frontend
+# is served from a different origin than the API.
+
+routeview:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    root: WARN
+    com.routeview: INFO
+
+# Production safety (spring.jpa.hibernate.ddl-auto=none and flyway.clean-disabled=true come from application.yml).
+# POSTGRES_PASSWORD has no default anywhere; the application will not start without it.
+spring:
+  jpa:
+    show-sql: false
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}

@@ -1,0 +1,33 @@
+.map-metro-control {
+  position: absolute;
+  z-index: 2;
+  right: var(--edge, 12px);
+  /* Wide screens: above the Choose Destination (188px) and Current Location (136px) buttons. */
+  bottom: 240px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.map-metro-control > * {
+  pointer-events: auto;
+}
+
+.map-metro-control__status {
+  max-width: min(260px, calc(100vw - 96px));
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  box-shadow: var(--shadow-2);
+}
+
+@media (max-width: 767.98px) {
+  .map-metro-control {
+    right: 10px;
+    bottom: 140px;
+  }
+}

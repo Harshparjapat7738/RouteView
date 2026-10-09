@@ -1,0 +1,92 @@
+/* Accessibility notes on route cards and in the Journey View. Meaning is always in the text, never in colour alone. */
+.access-note {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.access-note__label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.access-note[data-access-level='HAS_INACCESSIBLE'] {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-danger-soft);
+  color: var(--color-text);
+}
+
+.access-note[data-access-level='UNKNOWN'],
+.access-note[data-access-level='PARTIAL'],
+.access-note[data-access-level='NOT_APPLICABLE'] {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
+
+.access-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.access-details__title {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.access-details__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.access-details__row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 8px;
+  row-gap: 2px;
+  font-size: 0.8125rem;
+}
+
+.access-details__kind {
+  grid-row: span 3;
+  min-width: 3.2em;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.access-details__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.access-details__source {
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.access-details__row[data-access-status='INACCESSIBLE'] .access-details__status {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.access-details__row[data-access-status='UNKNOWN'] .access-details__status {
+  color: var(--color-warning-text, var(--color-text-muted));
+}
+
+.access-details__caveat {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}

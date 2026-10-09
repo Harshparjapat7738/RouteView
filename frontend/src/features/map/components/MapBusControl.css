@@ -1,0 +1,20 @@
+.map-bus-control {
+  position: absolute;
+  z-index: 2;
+  right: var(--edge, 12px);
+  /* Wide screens: above the Metro layer button (240px). */
+  bottom: 292px;
+  display: flex;
+  pointer-events: none;
+}
+
+.map-bus-control > * {
+  pointer-events: auto;
+}
+
+@media (max-width: 767.98px) {
+  .map-bus-control {
+    right: 10px;
+    bottom: 192px;
+  }
+}

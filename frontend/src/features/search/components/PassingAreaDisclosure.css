@@ -1,0 +1,63 @@
+.passing-disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 8px;
+}
+
+.passing-disclosure__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-md, 12px);
+  background: transparent;
+  color: var(--color-brand-strong);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.passing-disclosure__toggle:hover {
+  background: var(--color-brand-soft);
+}
+
+.passing-disclosure__text {
+  flex: 1;
+}
+
+.passing-disclosure__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+}
+
+.passing-disclosure__body[hidden] {
+  display: none;
+}
+
+/* Inside the panel the passing-area search is flat and scrolls within the panel's own scroll area. */
+.passing-disclosure .area-search {
+  padding: 4px 0 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  max-height: none;
+  overflow: visible;
+}
+
+.area-search--compact .area-search__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -1,0 +1,75 @@
+# Runs the whole stack (db + backend + frontend) in Docker, for devices without a
+# local JDK 21 / for reaching the app from another device (e.g. a phone) via Docker.
+# This is a convenience file on top of backend/docker-compose.yml (db only) and the
+# normal `./gradlew bootRun` / `npm run dev` workflow documented in README.md.
+#
+#   docker compose -f docker-compose.full.yml up -d       start everything, detached
+#   docker compose -f docker-compose.full.yml logs -f     follow logs
+#   docker compose -f docker-compose.full.yml down         stop (keeps db data/volumes)
+
+name: routeview
+
+include:
+  - backend/docker-compose.yml
+
+services:
+  backend:
+    image: gradle:8.14-jdk21
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - routeview-gradle-cache:/home/gradle/.gradle
+    env_file:
+      - ./backend/.env
+    environment:
+      # Container-to-container traffic always uses the db's internal port (5432),
+      # not POSTGRES_PORT from .env (that's only the host-published port).
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Gradle's own --continuous file-watcher doesn't receive change events across this bind
+    # mount (a Docker Desktop limitation on Windows), so this polls a checksum of the source
+    # tree instead and restarts bootRun only when something actually changed. setsid/process
+    # group kill ensures the whole JVM subtree stops cleanly before the next restart.
+    command:
+      - sh
+      - -c
+      - |
+        checksum() { find src -type f \( -name "*.java" -o -name "*.yml" -o -name "*.yaml" -o -name "*.properties" -o -name "*.sql" \) -exec md5sum {} + | sort | md5sum; }
+        while true; do
+          PREV=$$(checksum)
+          setsid gradle bootRun --no-daemon &
+          PID=$$!
+          while kill -0 "$$PID" 2>/dev/null; do
+            sleep 2
+            CUR=$$(checksum)
+            if [ "$$CUR" != "$$PREV" ]; then
+              echo ">>> Backend source changed, restarting bootRun..."
+              kill -TERM "-$$PID" 2>/dev/null
+              break
+            fi
+          done
+          wait "$$PID" 2>/dev/null
+        done
+
+  frontend:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      # Vite dev server's own /api proxy target (server-side, resolved by Docker DNS).
+      DEV_BACKEND_URL: http://backend:8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    command: sh -c "npm install && npm run dev -- --host"
+
+volumes:
+  routeview-gradle-cache:

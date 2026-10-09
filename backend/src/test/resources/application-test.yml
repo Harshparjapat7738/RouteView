@@ -1,0 +1,6 @@
+# Automated tests. Activate with @ActiveProfiles("test").
+
+logging:
+  level:
+    root: WARN
+    com.routeview: INFO

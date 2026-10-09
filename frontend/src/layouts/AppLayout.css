@@ -1,0 +1,71 @@
+.app-layout {
+  position: relative;
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-layout__main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.app-layout__offline {
+  position: absolute;
+  z-index: 20;
+  top: max(var(--edge), env(safe-area-inset-top));
+  right: var(--edge);
+  max-width: min(420px, calc(100% - 24px));
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  box-shadow: var(--shadow-2);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+/* On a phone the search panel owns the top edge; the notice sits just below it. */
+@media (max-width: 767.98px) {
+  .app-layout__offline {
+    top: 0;
+    right: 0;
+    left: 0;
+    max-width: none;
+    padding: calc(6px + env(safe-area-inset-top)) 16px 6px;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    text-align: center;
+  }
+
+  .app-layout[data-offline='true'] {
+    --offline-h: calc(34px + env(safe-area-inset-top));
+  }
+}
+
+/* The pointer to journeys saved for offline use: a plain text button inside the notice. */
+.app-layout__offline-open {
+  display: block;
+  min-height: 44px;
+  margin: 0 auto;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.app-layout__offline-open:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+  .app-layout[data-offline-hint='true'] {
+    --offline-h: calc(34px + 44px + env(safe-area-inset-top));
+  }
+}

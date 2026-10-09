@@ -1,0 +1,44 @@
+.area-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0 2px 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-soft);
+  color: var(--color-brand-strong);
+  font-size: 0.875rem;
+  font-weight: 600;
+  animation: area-chip-in var(--dur) var(--ease);
+}
+
+.area-chip__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.area-chip__remove {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin-left: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.area-chip__remove:hover {
+  background: color-mix(in srgb, var(--color-brand) 20%, transparent);
+}
+
+@keyframes area-chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
