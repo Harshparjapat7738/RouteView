@@ -16,6 +16,7 @@ import { RouteCard } from './RouteCard.tsx'
 import { ShareButton } from '../../share/components/ShareButton.tsx'
 import type { LocationSelection } from '../../location/types/location.ts'
 import { RouteStopsPreview } from './RouteStopsPreview.tsx'
+import { prioritizeRoutesByCoverage } from '../utils/routePointProximity.ts'
 import './RouteList.css'
 
 const NO_IDS: ReadonlySet<string> = new Set()
@@ -35,6 +36,10 @@ interface RouteListProps {
   onOpenJourney?: () => void
   /** The active passing-area search, or null when there is none. Routes absent from `matches` match nothing. */
   search?: RouteSearch | null
+  /** Route ids whose geometry is within the selected passing area's proximity radius. */
+  passingAreaMatches?: ReadonlySet<string>
+  /** The selected geocoded passing-area name, or null when no coordinate is selected. */
+  passingAreaName?: string | null
   /** Metro: the selected station (shared with the map) and how to change it. */
   selectedStationKey?: string | null
   onSelectStation?: (key: string | null) => void
@@ -64,6 +69,8 @@ export function RouteList({
   onOpenJourney,
   onRetry,
   search = null,
+  passingAreaMatches = NO_IDS,
+  passingAreaName = null,
   selectedStationKey = null,
   onSelectStation = NOOP,
   destinationName,
@@ -158,12 +165,13 @@ export function RouteList({
             </ul>
           )}
           <ul className="route-list__items">
-            {session.routes.map((route) => {
+            {prioritizeRoutesByCoverage(session.routes, passingAreaMatches).map((route, position) => {
               const selected = route.id === session.selectedRouteId
               return (
                 <li key={route.id}>
                   <RouteListItem
                     route={route}
+                    displayNumber={passingAreaName === null ? route.index + 1 : position + 1}
                     travelMode={session.travelMode}
                     selected={selected}
                     // Only the selected route cares which stop is highlighted; the others keep their props.
@@ -171,6 +179,7 @@ export function RouteList({
                     badges={badges?.get(route.id) ?? NO_BADGES}
                     match={search?.matches.get(route.id)}
                     searching={searching}
+                    passingAreaCovered={passingAreaMatches.has(route.id)}
                     onSelect={onSelect}
                     onAreaSelect={onAreaSelect}
                     selectedStationKey={selected ? selectedStationKey : null}
@@ -184,6 +193,13 @@ export function RouteList({
               )
             })}
           </ul>
+          {passingAreaName !== null && (
+            <p className="route-list__summary" role="status">
+              {passingAreaMatches.size > 0
+                ? `${passingAreaMatches.size} ${passingAreaMatches.size === 1 ? 'route covers' : 'routes cover'} ${passingAreaName}; matching routes are prioritized.`
+                : `No route passes through the specified area: ${passingAreaName}.`}
+            </p>
+          )}
         </>
       )}
     </section>
@@ -192,12 +208,14 @@ export function RouteList({
 
 interface RouteListItemProps {
   route: Route
+  displayNumber: number
   travelMode: TravelMode
   selected: boolean
   selectedAreaId: string | null
   badges: RouteBadges
   match: RouteMatch | undefined
   searching: boolean
+  passingAreaCovered: boolean
   onSelect: (routeId: string) => void
   onAreaSelect: (areaId: string | null) => void
   selectedStationKey: string | null
@@ -215,12 +233,14 @@ interface RouteListItemProps {
  */
 const RouteListItem = memo(function RouteListItem({
   route,
+  displayNumber,
   travelMode,
   selected,
   selectedAreaId,
   badges,
   match,
   searching,
+  passingAreaCovered,
   onSelect,
   onAreaSelect,
   selectedStationKey,
@@ -234,6 +254,7 @@ const RouteListItem = memo(function RouteListItem({
   return (
     <RouteCard
       route={route}
+      displayNumber={displayNumber}
       travelMode={travelMode}
       color={routeColor(route.index)}
       selected={selected}
@@ -241,6 +262,7 @@ const RouteListItem = memo(function RouteListItem({
       matchLabel={match ? describeMatch(match) : null}
       matchComplete={match?.complete ?? false}
       secondary={searching && match?.complete !== true}
+      passingAreaCovered={passingAreaCovered}
       onSelect={onSelect}
       accessRequested={accessRequested}
       actions={selected && end !== null ? <ShareButton route={route} travelMode={travelMode} start={start} destination={end} /> : undefined}

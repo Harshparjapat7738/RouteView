@@ -6,6 +6,7 @@ import type { LocationSelection } from '../types/location.ts'
 import { validateLocationPair } from '../utils/locationValidation.ts'
 import { PlacesButton } from '../../places/components/PlacesButton.tsx'
 import { LocationSearch } from './LocationSearch.tsx'
+import './LocationPanel.css'
 import './DirectionsPanel.css'
 
 interface DirectionsPanelProps {

@@ -12,6 +12,8 @@ import './RouteCard.css'
 
 interface RouteCardProps {
   route: Route
+  /** Position in the currently displayed, passing-area-prioritized list. */
+  displayNumber?: number
   /** The mode the route was calculated for. */
   travelMode: TravelMode
   /** The colour this route is drawn with on the map. */
@@ -24,6 +26,7 @@ interface RouteCardProps {
   matchComplete: boolean
   /** A search is active and this route does not match it: shown, but secondary. */
   secondary: boolean
+  passingAreaCovered?: boolean
   onSelect: (routeId: string) => void
   /** An accessibility preference is on: the card says what is known about the route's stations. */
   accessRequested?: boolean
@@ -38,18 +41,18 @@ interface RouteCardProps {
  * Selecting is done through the header button; `children` (the Journey Stops) render below it.
  * Selection is never shown by colour alone: there is a "Selected" label and a pressed state.
  */
-export function RouteCard({ route, travelMode, color, selected, badges, matchLabel, matchComplete, secondary, onSelect, accessRequested = false, actions, children }: RouteCardProps) {
+export function RouteCard({ route, displayNumber = route.index + 1, travelMode, color, selected, badges, matchLabel, matchComplete, secondary, passingAreaCovered = false, onSelect, accessRequested = false, actions, children }: RouteCardProps) {
   const areaCount = route.detectedAreas.length
   const ModeIcon = TRAVEL_MODE_ICONS[travelMode]
   const transit = route.transit
   const departs = transit ? formatClock(transit.departureTime) : ''
   const arrives = transit ? formatClock(transit.arrivalTime) : ''
   return (
-    <div className="route-card" data-selected={selected} data-match={matchLabel !== null && matchComplete} data-partial={matchLabel !== null && !matchComplete} data-secondary={secondary}>
+    <div className="route-card" data-selected={selected} data-match={matchLabel !== null && matchComplete} data-partial={matchLabel !== null && !matchComplete} data-passing-match={passingAreaCovered} data-secondary={secondary}>
       <button type="button" className="route-card__header" aria-pressed={selected} onClick={() => onSelect(route.id)}>
         <span className="route-card__swatch" style={{ backgroundColor: color }} aria-hidden="true" />
         <span className="route-card__body">
-          <span className="route-card__name">Route {route.index + 1}</span>
+          <span className="route-card__name">Route {displayNumber}</span>
           <span className="route-card__mode" data-route-mode={travelMode}>
             <ModeIcon width={16} height={16} />
             {TRAVEL_MODE_INFO[travelMode].label}
@@ -61,6 +64,7 @@ export function RouteCard({ route, travelMode, color, selected, badges, matchLab
             {badges.lowestFare === true && <span className="route-card__badge">Lowest fare</span>}
             {badges.fewestTransfers === true && <span className="route-card__badge">Fewest transfers</span>}
             {badges.leastWalking === true && <span className="route-card__badge">Shortest walking</span>}
+            {passingAreaCovered && <span className="route-card__badge route-card__badge--match">Covers Passing Area</span>}
             {matchLabel !== null && (
               <span className={`route-card__badge${matchComplete ? ' route-card__badge--match' : ' route-card__badge--partial'}`}>
                 {matchComplete && '✓ '}

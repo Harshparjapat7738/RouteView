@@ -5,6 +5,7 @@ import type { CurrentLocationState } from '../../location/hooks/useCurrentLocati
 import { useMediaQuery } from '../../../ui/useMediaQuery.ts'
 import { mapConfig } from '../config/mapConfig.ts'
 import type { MapCurrentLocation, MapHighlight, MapMarker, MapRoute } from '../types/map.ts'
+import type { DetectedArea } from '../../route/types/detectedArea.ts'
 import { MapCurrentLocationMarker } from './MapCurrentLocationMarker.tsx'
 import { MapDestinationControl } from './MapDestinationControl.tsx'
 import { MapLocateControl } from './MapLocateControl.tsx'
@@ -18,6 +19,7 @@ import type { MapBusPart, MapBusStop } from '../../bus/utils/mapBus.ts'
 import type { MetroNetworkState } from '../../metro/hooks/useMetroNetwork.ts'
 import type { MapStation } from '../../metro/utils/mapMetro.ts'
 import { MapRoutes } from './MapRoutes.tsx'
+import { MapRouteWaypoints } from './MapRouteWaypoints.tsx'
 import { MapViewport } from './MapViewport.tsx'
 import { MapStatusMessage } from './MapStatusMessage.tsx'
 import './MapView.css'
@@ -31,6 +33,9 @@ interface MapViewProps {
   dimmedRouteIds?: ReadonlySet<string>
   /** A point to emphasise, e.g. where the selected route reaches a chosen area. */
   highlight?: MapHighlight | null
+  /** Actual geographical areas along the currently selected alternative. */
+  waypoints?: readonly DetectedArea[]
+  selectedWaypointId?: string | null
   /** Changes when the layout around the map changes (Journey View, bottom-sheet height); the camera re-checks then. */
   layoutKey?: string
   /** The device position state; owned by the page so the start location can use it too. */
@@ -70,7 +75,7 @@ export interface MetroMapProps {
   onSelectStation: (key: string | null) => void
 }
 
-interface MapCanvasProps extends Required<Pick<MapViewProps, 'markers' | 'routes' | 'selectedRouteId' | 'highlight' | 'layoutKey' | 'locationState' | 'onLocate' | 'onDismissLocationError' | 'onChooseDestination' | 'destinationChosen'>> {
+interface MapCanvasProps extends Required<Pick<MapViewProps, 'markers' | 'routes' | 'selectedRouteId' | 'highlight' | 'waypoints' | 'selectedWaypointId' | 'layoutKey' | 'locationState' | 'onLocate' | 'onDismissLocationError' | 'onChooseDestination' | 'destinationChosen'>> {
   dimmedRouteIds?: ReadonlySet<string>
   onRouteSelect?: (routeId: string) => void
   metro?: MetroMapProps
@@ -94,6 +99,8 @@ export const MapView = memo(function MapView({
   onRouteSelect,
   dimmedRouteIds,
   highlight = null,
+  waypoints = [],
+  selectedWaypointId = null,
   layoutKey = '',
   locationState,
   onLocate,
@@ -111,6 +118,8 @@ export const MapView = memo(function MapView({
           routes={routes}
           selectedRouteId={selectedRouteId}
           highlight={highlight}
+          waypoints={waypoints}
+          selectedWaypointId={selectedWaypointId}
           layoutKey={layoutKey}
           locationState={locationState}
           onLocate={onLocate}
@@ -134,6 +143,8 @@ function MapCanvas({
   routes,
   selectedRouteId,
   highlight,
+  waypoints,
+  selectedWaypointId,
   layoutKey,
   locationState,
   onLocate,
@@ -197,6 +208,7 @@ function MapCanvas({
         <MapRoutes routes={routes} selectedRouteId={selectedRouteId} dimmedRouteIds={dimmedRouteIds} onRouteSelect={onRouteSelect} hiddenRouteIds={bus?.hiddenRouteIds} />
         <MapMarkers markers={markers} />
         <MapAreaHighlight highlight={highlight} />
+        <MapRouteWaypoints areas={waypoints} selectedAreaId={selectedWaypointId} />
         {metro !== undefined && (
           <MapMetro
             network={metro.layerOn && metro.network.status === 'ready' ? metro.network.network : null}

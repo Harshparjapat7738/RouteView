@@ -10,6 +10,7 @@ import { routeColor } from '../features/route/utils/routeColors.ts'
 import { MapView, type BusMapProps, type MetroMapProps } from '../features/map/components/MapView.tsx'
 import type { MapHighlight, MapMarker, MapRoute } from '../features/map/types/map.ts'
 import { useAreaSearch } from '../features/search/hooks/useAreaSearch.ts'
+import { usePassingAreaLocation } from '../features/search/hooks/usePassingAreaLocation.ts'
 import { PassingAreaDisclosure } from '../features/search/components/PassingAreaDisclosure.tsx'
 import { PassingAreaSearch } from '../features/search/components/PassingAreaSearch.tsx'
 import { JourneyView } from '../features/journey/components/JourneyView.tsx'
@@ -90,6 +91,7 @@ export function HomePage() {
   const { state, session, selectedArea, calculate, selectRoute, selectArea, selectRouteArea } = usePreferredSession(rawSession, start, destination, travelMode, preferences.preferences)
   const [preferencesOpen, setPreferencesOpen] = useState(false)
   const search = useAreaSearch(session)
+  const passingAreaLocation = usePassingAreaLocation(session, search.query)
   const pairKey = locationKey(start, destination)
   // The journey for which routes were dropped because the mode changed (shown as "press Find Routes").
   const [staleFor, setStaleFor] = useState<string | null>(null)
@@ -492,6 +494,15 @@ export function HomePage() {
       onRemove={search.remove}
       onClear={search.clearAreas}
       onChoose={selectRouteArea}
+      locationSearch={passingAreaLocation}
+      onSelectLocation={(suggestionId) => {
+        void passingAreaLocation.selectSuggestion(suggestionId).then((location) => {
+          if (location !== null) {
+            search.clearAreas()
+            search.setQuery(location.name)
+          }
+        })
+      }}
     />
   )
 
@@ -561,6 +572,8 @@ export function HomePage() {
                     onRetry={findRoutes}
                     onOpenJourney={openJourney}
                     search={search.view}
+                    passingAreaMatches={passingAreaLocation.matches}
+                    passingAreaName={passingAreaLocation.selected?.name ?? null}
                     selectedStationKey={selectedStationKey}
                     onSelectStation={selectStation}
                     destinationName={destination?.name}
@@ -579,6 +592,8 @@ export function HomePage() {
         onRouteSelect={selectRoute}
         dimmedRouteIds={dimmedRouteIds}
         highlight={highlight}
+        waypoints={selectedRoute?.detectedAreas}
+        selectedWaypointId={selectedArea?.areaId ?? null}
         layoutKey={`${journeyOpen ? 'journey' : 'compare'}:${hasSheet ? snap : 'none'}`}
         locationState={locationState}
         onLocate={locate}

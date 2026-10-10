@@ -43,6 +43,7 @@ export const RouteStopsPreview = memo(function RouteStopsPreview({ areas, matche
         </ol>
       ) : (
         <p id={listId} className="route-stops-preview__line">
+          <strong>Via: </strong>
           {areas.slice(0, shown).map((area, index) => (
             <span key={area.areaId}>
               {index > 0 && ' → '}

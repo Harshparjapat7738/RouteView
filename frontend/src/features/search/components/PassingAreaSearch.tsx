@@ -3,7 +3,9 @@ import { describeAreaType } from '../../route/utils/describeAreaType.ts'
 import { formatDistance, formatDuration } from '../../route/utils/formatRoute.ts'
 import { routeColor } from '../../route/utils/routeColors.ts'
 import type { RouteSession } from '../../route/types/routeSession.ts'
+import type { PassingAreaLocationSearch } from '../hooks/usePassingAreaLocation.ts'
 import { MAX_QUERY_LENGTH } from '../services/passingAreaSearchService.ts'
+import { PASSING_AREA_RADIUS_METERS } from '../../route/utils/routePointProximity.ts'
 import type {
   AreaSearchOutcome,
   AreaSearchResult,
@@ -35,14 +37,15 @@ interface PassingAreaSearchProps {
   onClear: () => void
   /** Called when the user chooses a route that passes through a found area. */
   onChoose: (routeId: string, areaId: string) => void
+  /** Google Places-backed geocoding for text entered in this field. */
+  locationSearch: PassingAreaLocationSearch
+  onSelectLocation: (suggestionId: string) => void
   /** Rendered inside the "Add passing area" disclosure: flat, without its own card. */
   compact?: boolean
 }
 
 /**
- * "Which of my routes passes through these areas?" Choose one or more of the geographical areas already
- * detected for the current routes; only routes through all of them match. It never contacts Google or any
- * other service.
+ * Checks a geocoded place against route geometry and preserves the existing local search of detected route areas.
  */
 export function PassingAreaSearch({
   session,
@@ -55,6 +58,8 @@ export function PassingAreaSearch({
   onRemove,
   onClear,
   onChoose,
+  locationSearch,
+  onSelectLocation,
   compact = false,
 }: PassingAreaSearchProps) {
   const inputId = useId()
@@ -67,7 +72,7 @@ export function PassingAreaSearch({
           Passing area
         </label>
         <p className="area-search__hint" id={`${inputId}-hint`}>
-          Search only among areas on your calculated routes.
+          Choose a place to check route geometry within {PASSING_AREA_RADIUS_METERS} m, or add a detected area.
         </p>
       </div>
       <div className="area-search__field">
@@ -76,21 +81,54 @@ export function PassingAreaSearch({
           id={inputId}
           className="area-search__input"
           type="search"
-          placeholder={selected.length > 0 ? 'Add another area...' : 'Search an area...'}
+          placeholder={selected.length > 0 ? 'Add another area...' : 'Search a place or area...'}
           value={query}
           maxLength={MAX_QUERY_LENGTH}
           autoComplete="off"
           aria-describedby={`${inputId}-hint`}
           spellCheck={false}
-          onChange={(event) => onQueryChange(event.target.value)}
+          aria-expanded={locationSearch.selected === null && locationSearch.suggestions.status === 'ready'}
+          aria-controls={locationSearch.selected === null && locationSearch.suggestions.status === 'ready' ? `${inputId}-places` : undefined}
+          onChange={(event) => {
+            locationSearch.clear()
+            onQueryChange(event.target.value)
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && firstSuggestion !== undefined) {
               event.preventDefault()
               onAdd(firstSuggestion)
+            } else if (event.key === 'Enter' && locationSearch.suggestions.status === 'ready' && locationSearch.suggestions.suggestions[0] !== undefined) {
+              event.preventDefault()
+              onSelectLocation(locationSearch.suggestions.suggestions[0].id)
             }
           }}
         />
       </div>
+      {locationSearch.selected !== null && (
+        <div className="area-search__location" role="status">
+          <span>
+            Checking routes within {PASSING_AREA_RADIUS_METERS} m of <strong>{locationSearch.selected.name}</strong>
+          </span>
+          <button
+            type="button"
+            className="area-search__location-clear"
+            aria-label={`Clear passing area ${locationSearch.selected.name}`}
+            onClick={() => {
+              locationSearch.clear()
+              onQueryChange('')
+            }}
+          >
+            <CloseIcon width={14} height={14} />
+          </button>
+        </div>
+      )}
+      {locationSearch.selected === null && query.trim().length >= 3 && (
+        <PlaceSuggestions
+          id={`${inputId}-places`}
+          locationSearch={locationSearch}
+          onSelect={onSelectLocation}
+        />
+      )}
       <SelectedAreaChips selected={selected} onRemove={onRemove} onClear={onClear} />
 
       <div className="area-search__output" aria-live="polite">
@@ -99,10 +137,22 @@ export function PassingAreaSearch({
             No routes available. Calculate routes first to search for passing areas.
           </p>
         )}
-        {outcome.status === 'no-match' && (
-          <p className="area-search__message">No passing area found in your calculated routes.</p>
+        {outcome.status === 'no-match' && locationSearch.selected === null && (
+          <p className="area-search__message">No detected route area matches that name. Choose a place suggestion to check the route geometry.</p>
         )}
-        {outcome.status === 'found' && session !== null && (
+        {locationSearch.selected !== null && (
+          locationSearch.matches.size > 0 ? (
+            <p className="area-search__headline" data-tone="success">
+              <CheckIcon width={16} height={16} /> {locationSearch.matches.size} {locationSearch.matches.size === 1 ? 'route passes' : 'routes pass'} within {PASSING_AREA_RADIUS_METERS} m
+            </p>
+          ) : (
+            <p className="area-search__message area-search__empty" data-tone="warning">
+              No route passes through the specified area.
+            </p>
+          )
+        )}
+        {locationSearch.error !== null && <p className="area-search__message area-search__empty" role="alert">{locationSearch.error}</p>}
+        {outcome.status === 'found' && session !== null && locationSearch.selected === null && (
           <AreaSuggestions
             results={outcome.results}
             session={session}
@@ -116,6 +166,47 @@ export function PassingAreaSearch({
         )}
       </div>
     </section>
+  )
+}
+
+function PlaceSuggestions({
+  id,
+  locationSearch,
+  onSelect,
+}: {
+  id: string
+  locationSearch: PassingAreaLocationSearch
+  onSelect: (suggestionId: string) => void
+}) {
+  const { suggestions } = locationSearch
+  if (suggestions.status === 'idle') {
+    if (locationSearch.availability === 'unavailable') {
+      return <p className="area-search__message" role="status">Place search is unavailable. Search detected areas on your calculated routes instead.</p>
+    }
+    return locationSearch.availability === 'loading'
+      ? <p className="area-search__message" role="status">Loading place search…</p>
+      : null
+  }
+  if (suggestions.status === 'loading' || locationSearch.resolving) {
+    return <p className="area-search__message" role="status">{locationSearch.resolving ? 'Resolving place…' : 'Searching places…'}</p>
+  }
+  if (suggestions.status === 'error') {
+    return <p className="area-search__message" role="alert">{suggestions.message}</p>
+  }
+  if (suggestions.suggestions.length === 0) {
+    return <p className="area-search__message" role="status">No place suggestions found. You can also choose a detected route area below.</p>
+  }
+  return (
+    <ul id={id} className="area-search__places" aria-label="Place suggestions">
+      {suggestions.suggestions.slice(0, MAX_RESULTS_SHOWN).map((suggestion) => (
+        <li key={suggestion.id}>
+          <button type="button" className="area-search__place" onClick={() => onSelect(suggestion.id)}>
+            <span className="area-search__place-name">{suggestion.primaryText}</span>
+            {suggestion.secondaryText !== undefined && <span className="area-search__place-detail">{suggestion.secondaryText}</span>}
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }
 
