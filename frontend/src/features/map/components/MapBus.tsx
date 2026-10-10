@@ -1,5 +1,5 @@
 import { AdvancedMarker, Polyline, useMap } from '@vis.gl/react-google-maps'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { BusStopMarker } from '../../bus/components/BusStopMarker.tsx'
 import { useBusStops } from '../../bus/hooks/useBusStops.ts'
 import {
@@ -13,6 +13,7 @@ import {
 import { mapConfig } from '../config/mapConfig.ts'
 import { readMapInsets } from '../utils/mapOverlays.ts'
 import { centerForVisiblePoint, clampInsets } from '../utils/viewportMath.ts'
+import { CloseIcon } from '../../../ui/Icons.tsx'
 import '../../bus/components/Bus.css'
 
 interface MapBusProps {
@@ -45,6 +46,8 @@ const WALK_DASH = [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 3 }, o
 export const MapBus = memo(function MapBus({ layerOn, parts, journeyStops, color, selectedStopKey, onSelectStop }: MapBusProps) {
   const map = useMap()
   const [view, setView] = useState<View>({ zoom: 0, window: null })
+  const [retryKey, setRetryKey] = useState(0)
+  const retryStops = useCallback(() => setRetryKey((key) => key + 1), [])
 
   useEffect(() => {
     if (!map) return
@@ -71,7 +74,7 @@ export const MapBus = memo(function MapBus({ layerOn, parts, journeyStops, color
   }, [map])
 
   const zoomedIn = view.zoom >= NETWORK_STOP_MIN_ZOOM
-  const stopsState = useBusStops(layerOn, zoomedIn, view.window)
+  const stopsState = useBusStops(layerOn, zoomedIn, view.window, retryKey)
   const journeyKeys = useMemo(() => new Set(journeyStops.map((stop) => stop.key)), [journeyStops])
   const journeyActive = journeyStops.length > 0
   const loaded = stopsState.status === 'ready' ? stopsState.data : stopsState.status === 'loading' || stopsState.status === 'error' ? stopsState.previous : null
@@ -135,7 +138,8 @@ export const MapBus = memo(function MapBus({ layerOn, parts, journeyStops, color
             />
           </AdvancedMarker>
         ))}
-      {layerOn && <BusLayerStatus state={stopsState} truncated={loaded?.truncated === true} />}
+      {selected && <BusStopDetail stop={selected} onClose={() => onSelectStop(null)} />}
+      {layerOn && <BusLayerStatus state={stopsState} truncated={loaded?.truncated === true} onRetry={retryStops} />}
     </>
   )
 })
@@ -149,17 +153,38 @@ function BusRidePolyline({ path, color }: { path: MapBusPart['path']; color: str
   )
 }
 
-function BusLayerStatus({ state, truncated }: { state: ReturnType<typeof useBusStops>; truncated: boolean }) {
+function BusLayerStatus({ state, truncated, onRetry }: { state: ReturnType<typeof useBusStops>; truncated: boolean; onRetry: () => void }) {
   let text = ''
   if (state.status === 'zoom-in') text = 'Zoom in to see bus stops.'
-  else if (state.status === 'loading') text = 'Loading bus stops...'
-  else if (state.status === 'error') text = 'Bus stops could not be loaded here.'
+  else if (state.status === 'loading') text = 'Loading bus stops…'
+  else if (state.status === 'error') text = 'Bus stops could not be loaded here. Check the backend connection and retry.'
   else if (state.status === 'ready' && state.data.stops.length === 0) text = 'No bus stops in this part of the map.'
   else if (truncated) text = 'Zoom in to see all bus stops.'
   if (text === '') return null
   return (
     <div className="map-bus-status" role="status" data-bus-layer-status={state.status}>
       {text}
+      {state.status === 'error' && (
+        <button type="button" className="map-bus-status__retry" onClick={onRetry}>
+          Retry
+        </button>
+      )}
     </div>
+  )
+}
+
+function BusStopDetail({ stop, onClose }: { stop: MapBusStop; onClose: () => void }) {
+  return (
+    <section className="map-bus-detail" aria-label="Bus stop details">
+      <div className="map-bus-detail__header">
+        <div>
+          <p className="map-bus-detail__eyebrow">Bus stop</p>
+          <h2 className="map-bus-detail__name">{stop.name}</h2>
+        </div>
+        <button type="button" className="map-bus-detail__close" aria-label="Close bus stop details" onClick={onClose}>
+          <CloseIcon width={18} height={18} />
+        </button>
+      </div>
+    </section>
   )
 }

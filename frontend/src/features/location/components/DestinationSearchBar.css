@@ -7,13 +7,15 @@
   align-items: center;
   gap: 8px;
   padding: 4px 6px 4px 8px;
+  border: 1px solid var(--color-input-border);
   border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-2);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
   transition: box-shadow var(--dur) var(--ease);
 }
 
 .search-bar:focus-within {
-  box-shadow: var(--shadow-3);
+  box-shadow: var(--shadow-2);
   /* The field itself has no outline: the whole bar shows the focus ring. */
   outline: 2px solid var(--color-focus);
   outline-offset: 0;

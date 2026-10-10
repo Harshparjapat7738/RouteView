@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchMetroNetwork } from '../services/metroApi.ts'
 import type { MetroNetwork } from '../types/metro.ts'
 
@@ -15,8 +15,9 @@ export type MetroNetworkState =
  * same data for everyone, so a finished load is kept for the rest of the session and switching the layer off and
  * on never reloads it. A failed load is retried the next time the layer is switched on.
  */
-export function useMetroNetwork(wanted: boolean): MetroNetworkState {
+export function useMetroNetwork(wanted: boolean): MetroNetworkState & { retry: () => void } {
   const [state, setState] = useState<MetroNetworkState>({ status: 'idle' })
+  const [retryKey, setRetryKey] = useState(0)
   const finished = useRef(false)
   const started = useRef(false)
 
@@ -48,7 +49,13 @@ export function useMetroNetwork(wanted: boolean): MetroNetworkState {
         started.current = false
       }
     }
-  }, [wanted])
+  }, [wanted, retryKey])
 
-  return state
+  const retry = useCallback(() => {
+    if (state.status === 'error') {
+      setRetryKey((key) => key + 1)
+    }
+  }, [state.status])
+
+  return { ...state, retry }
 }

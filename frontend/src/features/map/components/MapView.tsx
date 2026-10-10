@@ -37,7 +37,7 @@ interface MapViewProps {
   locationState: CurrentLocationState
   onLocate: () => void
   onDismissLocationError: () => void
-  /** Opens the destination search (the "Choose destination" map control). */
+  /** Opens route planning (the "Choose destination" map control). */
   onChooseDestination: () => void
   /** A destination is confirmed: the control shows its active state. */
   destinationChosen: boolean
@@ -63,6 +63,7 @@ export interface MetroMapProps {
   layerOn: boolean
   network: MetroNetworkState
   onToggleLayer: () => void
+  onRetry: () => void
   journeyStations: readonly MapStation[]
   journeyLineIds: ReadonlySet<string>
   selectedStationKey: string | null
@@ -218,7 +219,7 @@ function MapCanvas({
         <MapCurrentLocationMarker location={currentLocation} />
       </Map>
       {bus !== undefined && <MapBusControl on={bus.layerOn} enabled={loaded} onToggle={bus.onToggleLayer} />}
-      {metro !== undefined && <MapMetroControl on={metro.layerOn} state={metro.network} enabled={loaded} onToggle={metro.onToggleLayer} />}
+      {metro !== undefined && <MapMetroControl on={metro.layerOn} state={metro.network} enabled={loaded} onToggle={metro.onToggleLayer} onRetry={metro.onRetry} />}
       <MapDestinationControl active={destinationChosen} enabled={loaded} onChoose={onChooseDestination} />
       <MapLocateControl state={locationState} enabled={loaded} onLocate={onLocate} onDismissError={onDismissLocationError} />
       {!loaded && (

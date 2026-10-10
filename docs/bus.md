@@ -1,7 +1,8 @@
 # Bus network: dataset ingestion and database foundation
 
-This is the **data foundation** for Delhi buses only: the GTFS dataset is validated and stored in PostgreSQL/PostGIS.
-There is no journey calculation, no API and no UI for buses yet.
+The Delhi GTFS dataset is validated and stored in PostgreSQL/PostGIS. The application uses the imported data for
+scheduled bus journey planning, nearby-stop queries and the map's in-view bus-stop layer. The map layer shows
+stops only; the source feed has no `shapes.txt` and RouteView does not claim live vehicle positions.
 
 ## The dataset
 
@@ -63,8 +64,14 @@ Indexes: unique `(source, external_id)` on every entity; GiST on `bus_stop.locat
 Spatial query note: `ST_DWithin(location::geography, ...)` does not use the geometry GiST index; use the KNN operator
 (`ORDER BY location <-> point LIMIT n`) or a geometry `ST_DWithin` with a degree bound / bounding-box prefilter.
 
-## Not done (on purpose)
+## Current capabilities and limits
 
-Journey calculation, stop search, bus API endpoints, UI, fares, transfers, live data.
+* `POST /api/bus/journey` plans journeys from imported schedules; it is not live vehicle tracking.
+* `GET /api/bus/stops/nearby` returns stops suitable for journey planning.
+* `GET /api/bus/stops/in-view` returns stops in a bounded map window. It refuses windows larger than 0.04 degrees;
+  the map requests stops only when zoomed in and reports an empty window separately from request failures.
+* The frontend displays the in-view stops and selected journey's returned stop-to-stop paths. Since this feed has no
+  `shapes.txt`, these paths follow ordered stops rather than a source-provided road-aligned shape.
+* Fares, transfers from `transfers.txt`, and live positions are not supplied by this feed and are not fabricated.
 
 See also [the bus journey engine](bus-journey.md), which plans journeys over this data.

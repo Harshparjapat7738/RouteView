@@ -15,7 +15,7 @@ const DEBOUNCE_MS = 300
  * Loads the bus stops of the window the map shows, only while the Bus layer is on and the map is zoomed in. A new window
  * cancels the previous request, and moving the map around never fires one request per frame (it waits until it settles).
  */
-export function useBusStops(layerOn: boolean, zoomedIn: boolean, window: BusWindow | null): BusStopsState {
+export function useBusStops(layerOn: boolean, zoomedIn: boolean, window: BusWindow | null, retryKey = 0): BusStopsState {
   const [result, setResult] = useState<{ window: BusWindow; state: 'loading' | 'ready' | 'error'; data: BusStopsInWindow | null } | null>(null)
   const active = layerOn && zoomedIn && window !== null
   const south = window?.south
@@ -42,7 +42,7 @@ export function useBusStops(layerOn: boolean, zoomedIn: boolean, window: BusWind
       clearTimeout(timer)
       controller.abort()
     }
-  }, [active, south, west, north, east])
+  }, [active, south, west, north, east, retryKey])
 
   if (!layerOn) return { status: 'off' }
   if (!zoomedIn) return { status: 'zoom-in' }

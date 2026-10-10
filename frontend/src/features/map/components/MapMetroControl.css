@@ -15,6 +15,10 @@
 }
 
 .map-metro-control__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   max-width: min(260px, calc(100vw - 96px));
   padding: 8px 12px;
   border-radius: var(--radius-md);
@@ -23,6 +27,24 @@
   font-size: 0.8125rem;
   line-height: 1.4;
   box-shadow: var(--shadow-2);
+}
+
+.map-metro-control__retry {
+  flex: none;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-brand-strong);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.map-metro-control__retry:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 @media (max-width: 767.98px) {

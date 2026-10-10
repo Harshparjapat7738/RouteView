@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DestinationSearchBar } from '../features/location/components/DestinationSearchBar.tsx'
 import { DirectionsPanel } from '../features/location/components/DirectionsPanel.tsx'
-import { LocationPanel } from '../features/location/components/LocationPanel.tsx'
 import { useCurrentLocation } from '../features/location/hooks/useCurrentLocation.ts'
 import type { LocationSelection } from '../features/location/types/location.ts'
 import { useMetroNetwork } from '../features/metro/hooks/useMetroNetwork.ts'
@@ -67,7 +66,9 @@ export function HomePage() {
   const [startFieldKey, setStartFieldKey] = useState(0)
   const [locatingStart, setLocatingStart] = useState(false)
   const [locateError, setLocateError] = useState<string | null>(null)
-  const pendingStart = useRef(false)
+  const pendingStart = useRef<{ version: number } | null>(null)
+  const startSelectionVersion = useRef(0)
+  const startInitializationAttempted = useRef(false)
   const [destinationFocus, setDestinationFocus] = useState(0)
   // Saved places and recent journeys: kept in this browser only, opened from a button so the map screen stays clear.
   const places = usePlaces()
@@ -167,6 +168,7 @@ export function HomePage() {
       layerOn: metroLayerOn,
       network: metroNetwork,
       onToggleLayer: toggleMetroLayer,
+      onRetry: metroNetwork.retry,
       journeyStations: metroStations,
       journeyLineIds: metroLineIds,
       selectedStationKey,
@@ -202,6 +204,10 @@ export function HomePage() {
   const resetSearch = search.reset
   const changeStart = useCallback(
     (location: LocationSelection | null) => {
+      startSelectionVersion.current++
+      startInitializationAttempted.current = true
+      pendingStart.current = null
+      setLocatingStart(false)
       setStart(location)
       setLocateError(null)
       resetSearch()
@@ -217,14 +223,17 @@ export function HomePage() {
       setPlacesOpen(false)
       if (location !== null) {
         setDirectionsOpen(true)
-        // The route configuration appears with the destination; on a phone its sheet opens to a readable height.
-        setSnap('half')
+        setSnap('full')
       }
     },
     [resetSearch],
   )
   // Swapping exchanges the two places; it is a different journey, exactly like choosing new places.
   const swapLocations = useCallback(() => {
+    startSelectionVersion.current++
+    startInitializationAttempted.current = true
+    pendingStart.current = null
+    setLocatingStart(false)
     setStart(destination)
     setDestination(start)
     setStartFieldKey((key) => key + 1)
@@ -255,14 +264,12 @@ export function HomePage() {
     [resetSearch],
   )
   const closeDirections = useCallback(() => {
-    setDestination(null)
     setDirectionsOpen(false)
-    setDestinationFieldKey((key) => key + 1)
     resetSearch()
     setJourneyOpen(false)
   }, [resetSearch])
   const startFromCurrentLocation = useCallback(() => {
-    pendingStart.current = true
+    pendingStart.current = { version: startSelectionVersion.current }
     setLocatingStart(true)
     setLocateError(null)
     locate()
@@ -270,14 +277,15 @@ export function HomePage() {
   // Only a press on "Use my current location" turns a fix into the start; the map's locate button never does.
   const fixId = locationState.position?.fixId
   useEffect(() => {
-    if (!pendingStart.current || locationState.status === 'locating') {
+    const pending = pendingStart.current
+    if (pending === null || locationState.status === 'locating') {
       return
     }
-    pendingStart.current = false
+    pendingStart.current = null
     setLocatingStart(false)
     if (locationState.status === 'error') {
       setLocateError(locationState.message)
-    } else if (locationState.position) {
+    } else if (locationState.position && pending.version === startSelectionVersion.current) {
       const { latitude, longitude } = locationState.position
       setStart({ name: 'Current location', latitude, longitude, origin: 'CURRENT_LOCATION' })
       setStartFieldKey((key) => key + 1)
@@ -286,14 +294,40 @@ export function HomePage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fixId, locationState.status])
+  useEffect(() => {
+    if (!directionsOpen || start !== null || startInitializationAttempted.current) {
+      return
+    }
+    startInitializationAttempted.current = true
+    const position = locationState.position
+    if (
+      position !== null &&
+      Number.isFinite(position.latitude) &&
+      Number.isFinite(position.longitude) &&
+      Math.abs(position.latitude) <= 90 &&
+      Math.abs(position.longitude) <= 180
+    ) {
+      setStart({
+        name: 'Current location',
+        latitude: position.latitude,
+        longitude: position.longitude,
+        origin: 'CURRENT_LOCATION',
+      })
+      setStartFieldKey((key) => key + 1)
+      setLocateError(null)
+      return
+    }
+    if (locationState.status !== 'error') {
+      startFromCurrentLocation()
+    } else {
+      setLocateError(locationState.message)
+    }
+  }, [directionsOpen, start, locationState, startFromCurrentLocation])
   const chooseDestination = useCallback(() => {
     setDestinationFocus((n) => n + 1)
-    // Wide screens: the directions panel opens at once, with the destination field focused.
-    if (desktop) {
-      setDirectionsOpen(true)
-    }
-    setSnap((current) => (current === 'full' ? 'half' : current))
-  }, [desktop])
+    setDirectionsOpen(true)
+    setSnap('full')
+  }, [])
 
   const closeJourney = useCallback(() => {
     setJourneyOpen(false)
@@ -358,6 +392,7 @@ export function HomePage() {
   // Repeating restores the inputs and the mode, then calculates afresh (never the old Google result).
   const repeatJourney = useCallback(
     ({ start: from, destination: to, travelMode: mode }: Omit<RepeatRequest, 'start'> & { start: RepeatRequest['start'] | null }) => {
+      startInitializationAttempted.current = true
       setPlacesOpen(false)
       setTravelMode(mode)
       setDestination(to)
@@ -424,7 +459,7 @@ export function HomePage() {
     [selectedArea],
   )
 
-  const hasSheet = placesOpen || preferencesOpen || (desktop ? directionsOpen : destination !== null)
+  const hasSheet = placesOpen || preferencesOpen || directionsOpen
   const dock = desktop && (directionsOpen || placesOpen || preferencesOpen)
   const withPreferences = () => (
     <>
@@ -470,7 +505,7 @@ export function HomePage() {
     >
       {sharedLink.notice !== null && <SharedLinkNotice notice={sharedLink.notice} onRetry={sharedLink.retry} onDismiss={sharedLink.dismiss} />}
       <div className="home-page__sidebar" data-map-overlay={dock ? '' : undefined}>
-        {(desktop ? !directionsOpen : !journeyOpen) && <DestinationSearchBar key={destinationFieldKey} destination={destination} onChange={changeDestination} focusSignal={destinationFocus} onOpenPlaces={openPlaces} />}
+        {!directionsOpen && !journeyOpen && <DestinationSearchBar key={destinationFieldKey} destination={destination} onChange={changeDestination} focusSignal={destinationFocus} onOpenPlaces={openPlaces} />}
         {!hasSheet && selector('floating')}
         {hasSheet && (
           <BottomSheet snap={snap} onSnapChange={setSnap} label={preferencesOpen ? 'Travel preferences' : placesOpen ? 'Saved places and recent journeys' : journeyOpen ? 'Journey details' : 'Route options'}>
@@ -495,7 +530,6 @@ export function HomePage() {
               </>
             ) : (
               <>
-                {desktop ? (
                 <DirectionsPanel
                   start={start}
                   destination={destination}
@@ -518,25 +552,6 @@ export function HomePage() {
                     {passingSearch(true)}
                   </PassingAreaDisclosure>
                 </DirectionsPanel>
-                ) : (
-                <LocationPanel
-                  start={start}
-                  destination={destination}
-                  onStartChange={changeStart}
-                  onUseCurrentLocation={startFromCurrentLocation}
-                  onOpenPlaces={openPlaces}
-                  locatingStart={locatingStart}
-                  locateError={locateError}
-                  startFieldKey={startFieldKey}
-                  onFindRoutes={findRoutes}
-                  isFindingRoutes={state.status === 'loading'}
-                  modeSelector={withPreferences()}
-                >
-                  <PassingAreaDisclosure selected={search.selected} onRemove={search.remove}>
-                    {passingSearch(true)}
-                  </PassingAreaDisclosure>
-                </LocationPanel>
-                )}
                 {state.status !== 'none' && (
                   <RouteList
                     state={state}

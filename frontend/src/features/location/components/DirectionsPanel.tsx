@@ -1,7 +1,7 @@
 import { memo, useId, useState } from 'react'
 import type { ReactNode } from 'react'
 import { env } from '../../../config/env.ts'
-import { CloseIcon, LocateIcon, PinIcon, SwapIcon } from '../../../ui/Icons.tsx'
+import { CloseIcon, LocateIcon, SwapIcon } from '../../../ui/Icons.tsx'
 import type { LocationSelection } from '../types/location.ts'
 import { validateLocationPair } from '../utils/locationValidation.ts'
 import { PlacesButton } from '../../places/components/PlacesButton.tsx'
@@ -15,7 +15,7 @@ interface DirectionsPanelProps {
   onDestinationChange: (location: LocationSelection | null) => void
   /** Exchanges start and destination. */
   onSwap: () => void
-  /** Closes the directions panel and clears the destination. */
+  /** Closes the panel without changing the selected locations or route. */
   onClose: () => void
   onUseCurrentLocation: () => void
   /** Opens the saved places and recent journeys panel. */
@@ -38,8 +38,7 @@ interface DirectionsPanelProps {
 const NOT_CONFIGURED_MESSAGE = 'Location search is unavailable because the Google Maps API key is not configured.'
 
 /**
- * The docked directions panel of wide screens (the Google Maps way): both fields stacked with a rail between
- * them, a swap button, a "Your location" shortcut for the start, Find Routes and the passing-area control.
+ * The route-planning panel: both fields, a swap button, a current-location shortcut, Find Routes and passing-area controls.
  */
 export const DirectionsPanel = memo(function DirectionsPanel({
   start,
@@ -73,9 +72,9 @@ export const DirectionsPanel = memo(function DirectionsPanel({
   }
 
   return (
-    <section className="directions-panel location-panel" aria-label="Directions" data-map-overlay="">
+    <section className="directions-panel location-panel" aria-label="Plan your route" data-map-overlay="">
       <header className="directions-panel__header">
-        <h2 className="directions-panel__title">Directions</h2>
+        <h2 className="directions-panel__title">Plan your route</h2>
         <span className="directions-panel__header-actions">
           {env.isGoogleMapsConfigured && onOpenPlaces && <PlacesButton onClick={onOpenPlaces} />}
         <button type="button" className="directions-panel__close" aria-label="Close directions" onClick={onClose}>
@@ -88,17 +87,12 @@ export const DirectionsPanel = memo(function DirectionsPanel({
 
       {env.isGoogleMapsConfigured ? (
         <div className="directions-panel__fields">
-          <div className="directions-panel__rail" aria-hidden="true">
-            <span className="directions-panel__circle" />
-            <span className="directions-panel__dots" />
-            <PinIcon className="directions-panel__pin" width={20} height={20} />
-          </div>
           <div className="directions-panel__inputs">
             <LocationSearch
               key={`start-${startFieldKey}`}
               label="From"
               kind="start"
-              placeholder="Choose starting point"
+              placeholder={locatingStart ? 'Locating you…' : 'Choose starting point'}
               value={start}
               onChange={(location) => {
                 setSubmitted(false)
@@ -143,7 +137,7 @@ export const DirectionsPanel = memo(function DirectionsPanel({
         <span className="directions-panel__here-icon">
           <LocateIcon />
         </span>
-        <span>{locatingStart ? 'Finding your location...' : 'Your location'}</span>
+        <span>{locatingStart ? 'Locating you…' : 'Use current location'}</span>
       </button>
 
       <div aria-live="polite">

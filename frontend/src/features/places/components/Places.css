@@ -386,9 +386,3 @@
   background: transparent;
   color: var(--color-text);
 }
-
-@media (prefers-color-scheme: dark) {
-  .places-panel__primary {
-    color: #042f2c;
-  }
-}

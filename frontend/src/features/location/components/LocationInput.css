@@ -28,9 +28,9 @@
   width: 100%;
   min-height: 44px;
   padding: 0 44px 0 42px;
-  border: 2px solid transparent;
+  border: 1px solid var(--color-input-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface-muted);
+  background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
   text-overflow: ellipsis;
@@ -38,15 +38,15 @@
 }
 
 .location-input__field::placeholder {
-  color: var(--color-text-muted);
+  color: var(--color-placeholder);
 }
 
 .location-input__field:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-text) 8%, var(--color-surface-muted));
+  background: var(--color-hover);
 }
 
 .location-input__field:focus {
-  border-color: transparent;
+  border-color: var(--color-focus);
   background: var(--color-surface);
   outline: 2px solid var(--color-focus);
   outline-offset: 0;

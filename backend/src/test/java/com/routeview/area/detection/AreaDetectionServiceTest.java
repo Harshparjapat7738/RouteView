@@ -81,14 +81,14 @@ class AreaDetectionServiceTest {
     @Test
     void aRouteWithNoAreasIsStillAValidResult() {
         AreaDetectionService service = new AreaDetectionService(
-                (route, tolerance, types) -> List.of(), AreaDetectionProperties.defaults());
+                (route, tolerance, types, boundaryBand, minVisit) -> List.of(), AreaDetectionProperties.defaults());
 
         assertTrue(service.detectAreas(route(0, ROUTE_A)).isEmpty());
     }
 
     @Test
     void invalidOrMissingGeometryNeverReachesTheDatabaseAndNeverThrows() {
-        AreaDetectionService service = new AreaDetectionService((route, tolerance, types) -> {
+        AreaDetectionService service = new AreaDetectionService((route, tolerance, types, boundaryBand, minVisit) -> {
             throw new AssertionError("the database must not be queried");
         }, AreaDetectionProperties.defaults());
 
@@ -100,7 +100,7 @@ class AreaDetectionServiceTest {
 
     @Test
     void databaseOrSpatialQueryFailureDoesNotFailRouteCalculation() {
-        AreaDetectionService failing = new AreaDetectionService((route, tolerance, types) -> {
+        AreaDetectionService failing = new AreaDetectionService((route, tolerance, types, boundaryBand, minVisit) -> {
             throw new IllegalStateException("connection refused: secret-host");
         }, AreaDetectionProperties.defaults());
         RouteService routes = new RouteService(
@@ -115,7 +115,7 @@ class AreaDetectionServiceTest {
 
     @Test
     void invalidAreaDataReturnedByTheQueryIsDroppedNotThrown() {
-        AreaDetectionService service = new AreaDetectionService((route, tolerance, types) -> List.of(
+        AreaDetectionService service = new AreaDetectionService((route, tolerance, types, boundaryBand, minVisit) -> List.of(
                 candidate(java.util.UUID.randomUUID(), "Broken", AreaType.VILLAGE, Double.NaN, Double.NaN, Double.NaN, 1),
                 candidate("Fine", AreaType.VILLAGE, 1000, 900)), AreaDetectionProperties.defaults());
 

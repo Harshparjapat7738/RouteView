@@ -55,7 +55,7 @@ Dependencies are kept minimal (React, `@vis.gl/react-google-maps`). Tailwind CSS
 
 - **Node.js 22.12+** (includes npm)
 - **Docker** (for the local PostgreSQL + PostGIS database; or your own PostgreSQL with PostGIS)
-- **JDK 21** (e.g. Eclipse Temurin 21). Gradle itself is downloaded by the wrapper; no global install needed.
+- **JDK 21** (e.g. Eclipse Temurin 21). The backend pins the Gradle daemon, Java compilation, and test runtime to Java 21; use a Java version manager that reads `backend/.java-version` or set `JAVA_HOME` to a JDK 21 installation. Gradle itself is downloaded by the wrapper.
 
 ## Getting started
 

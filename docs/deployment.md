@@ -23,6 +23,7 @@ Nothing here has been deployed or verified against live Vercel, Render or Google
 ## 2. Backend on Render
 
 Render has no native Java runtime, so the service uses the Docker runtime and `backend/Dockerfile`.
+The image builds with Eclipse Temurin JDK 21 and runs on its JRE 21 image; no separate Render Java version setting or `render.yaml` is used.
 
 | Setting | Value |
 |---|---|

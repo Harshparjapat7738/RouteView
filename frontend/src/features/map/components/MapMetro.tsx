@@ -1,5 +1,5 @@
 import { AdvancedMarker, Polyline, useMap } from '@vis.gl/react-google-maps'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { MetroStationDetail } from '../../metro/components/MetroStationDetail.tsx'
 import { MetroStationMarker } from '../../metro/components/MetroStationMarker.tsx'
 import type { MetroNetwork } from '../../metro/types/metro.ts'
@@ -38,6 +38,7 @@ const NO_STATIONS: readonly MapStation[] = []
 export const MapMetro = memo(function MapMetro({ network, journeyStations, journeyLineIds, selectedStationKey, onSelectStation }: MapMetroProps) {
   const map = useMap()
   const [zoom, setZoom] = useState(() => map?.getZoom() ?? 0)
+  const fittedDataset = useRef<string | null>(null)
 
   useEffect(() => {
     if (!map) return
@@ -47,6 +48,20 @@ export const MapMetro = memo(function MapMetro({ network, journeyStations, journ
     const listener = map.addListener('zoom_changed', () => setZoom(map.getZoom() ?? 0))
     return () => listener.remove()
   }, [map])
+
+  useEffect(() => {
+    if (!map || network === null || network.dataset === null) return
+    const datasetKey = `${network.dataset.source}:${network.dataset.sourceVersion}:${network.dataset.importedAt ?? ''}`
+    if (fittedDataset.current === datasetKey) return
+    fittedDataset.current = datasetKey
+    if ((map.getZoom() ?? 0) > mapConfig.defaultZoom + 1) return
+
+    const bounds = new google.maps.LatLngBounds()
+    for (const station of network.stations) {
+      bounds.extend({ lat: station.latitude, lng: station.longitude })
+    }
+    if (!bounds.isEmpty()) map.fitBounds(bounds, 48)
+  }, [map, network])
 
   const lines = useMemo(() => (network ? networkLines(network) : []), [network])
   const stations = useMemo(() => (network ? networkStations(network) : NO_STATIONS), [network])

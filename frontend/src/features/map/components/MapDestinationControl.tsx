@@ -12,8 +12,8 @@ interface MapDestinationControlProps {
 }
 
 /**
- * Floating "Choose destination" control. It only opens the destination search (the address search bar);
- * it never changes the destination by itself, and is different from the Current Location button above/below it.
+ * Floating "Choose destination" control. It opens route planning but never changes the destination itself.
+ * It is different from the Current Location button above/below it.
  */
 export const MapDestinationControl = memo(function MapDestinationControl({ active, enabled, onChoose }: MapDestinationControlProps) {
   return (
