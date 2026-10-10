@@ -1,6 +1,6 @@
 # Area data import
 
-RouteView answers "which geographical areas does this route pass through?", so it needs real area boundaries in PostgreSQL/PostGIS. This document describes the import that fills the `area` table. The import only stores areas: nothing detects areas along a route yet.
+RouteView answers "which geographical areas does this route pass through?", so it needs real area boundaries in PostgreSQL/PostGIS. This document describes the import that fills the `area` table. After import, the Area Detection Engine matches each calculated route's geometry to these stored boundaries and returns the areas it genuinely crosses in travel order; see [`area-detection.md`](area-detection.md).
 
 ```text
 OpenStreetMap (Overpass API or a saved file)

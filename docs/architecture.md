@@ -65,7 +65,7 @@ Find Routes (HomePage) → useRouteCalculation → POST /api/routes
   → RouteController → RouteService → RoutingProvider ← GoogleRoutesProvider → Google Routes API
 ```
 
-**Decision: routing runs on the backend.** The Routes API is called with the *server* key (`GOOGLE_MAPS_SERVER_API_KEY`), which never reaches the browser. The browser key is referrer-restricted to the Maps JavaScript and Places APIs and is deliberately not reused (a server request has no referrer). The backend is also where the future Area Detection Engine needs the route geometry, so route data does not have to round-trip through the client.
+**Decision: routing runs on the backend.** The Routes API is called with the *server* key (`GOOGLE_MAPS_SERVER_API_KEY`), which never reaches the browser. The browser key is referrer-restricted to the Maps JavaScript and Places APIs and is deliberately not reused (a server request has no referrer). The backend also runs the Area Detection Engine against each returned route geometry, so route data does not have to round-trip through the client.
 
 - `routing` has its own provider-neutral types (`RoutingRequest`, `RouteCandidate`) and the `RoutingProvider` interface. Everything Google-specific (`GoogleRoutesProvider`, request factory, response mapper, properties) is package-private to `routing.google`.
 - `route` depends on `routing`, never the reverse. `RouteService` turns candidates into the internal `Route` (id, index, distance, duration, encoded polyline, summary).

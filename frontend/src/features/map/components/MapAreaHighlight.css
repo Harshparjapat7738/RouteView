@@ -10,11 +10,13 @@
 .map-area-highlight__label {
   max-width: 160px;
   padding: 2px 8px;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: #111827;
-  color: #ffffff;
+  background: var(--color-surface);
+  color: var(--color-text);
   font-size: 0.75rem;
   font-weight: 600;
+  box-shadow: var(--shadow-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

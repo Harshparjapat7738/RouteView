@@ -47,9 +47,9 @@ export const JourneyStops = memo(function JourneyStops({ areas, selectedAreaId, 
   }, [selectedAreaId])
 
   return (
-    <section className="journey-stops" aria-label="Journey Stops">
+    <section className="journey-stops" aria-label="Areas along this route">
       <h3 className="journey-stops__title">
-        Journey Stops <span className="journey-stops__count">({areas.length})</span>
+        Areas along this route <span className="journey-stops__count">({areas.length})</span>
       </h3>
       {areas.length === 0 ? (
         <p className="journey-stops__empty" role="status">

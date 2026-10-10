@@ -155,7 +155,7 @@
     max-height: none;
     overflow: visible;
     border-radius: 0;
-    background: transparent;
+    background: var(--color-surface);
     box-shadow: none;
     align-self: stretch;
   }
@@ -261,7 +261,7 @@
   .home-page .area-search,
   .home-page .route-list,
   .home-page .journey-view {
-    background: transparent;
+    background: var(--color-surface);
     box-shadow: none;
     border-radius: 0;
   }

@@ -12,7 +12,7 @@ interface JourneyTimelineProps {
 
 /**
  * Start → detected geographical areas → Destination, in travel order. Start and destination are the journey's
- * ends, visually distinct from the Journey Stops. Choosing a stop only highlights it (and its place on the map):
+ * ends, visually distinct from the areas along the route. Choosing an area only highlights it (and its place on the map):
  * the route stays selected and nothing is requested.
  */
 export const JourneyTimeline = memo(function JourneyTimeline({ journey, onSelectStop }: JourneyTimelineProps) {
